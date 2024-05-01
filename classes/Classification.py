@@ -1,5 +1,5 @@
 """## Classification"""
-
+#%%
 """Import"""
 from spacy.lang.fr import French
 import spacy
@@ -16,13 +16,13 @@ import shutil
 
 
 # get the pre-trained fast text embeddings for French
-input_file = 'content/cc.fr.300.bin.gz'
-output_file = 'content/cc.fr.300.bin'
+# input_file = 'content/cc.fr.300.bin.gz'
+# output_file = 'content/cc.fr.300.bin'
 
-# unzip gzip file
-with gzip.open(input_file, 'rb') as f_in:
-    with open(output_file, 'wb') as f_out:
-        shutil.copyfileobj(f_in, f_out)
+# # unzip gzip file
+# with gzip.open(input_file, 'rb') as f_in:
+#     with open(output_file, 'wb') as f_out:
+#         shutil.copyfileobj(f_in, f_out)
 
 """Pre-trained Embeddings"""
 # load the different embeddings
@@ -33,6 +33,7 @@ ft = fasttext.load_model('../../cc.fr.300.bin')
 w2v = KeyedVectors.load_word2vec_format("../../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
 # glove ???
 
+#%%
 """Data Preparation"""
 # prepare tokenizer
 nlp = French()
@@ -105,7 +106,6 @@ def get_x_y(data, lemma, embedding_size, embedding_type):
 
 #   return (X, y)
 
-
 """Classification functions"""
 # Cross validation Classification
 
@@ -114,18 +114,23 @@ def cv_classification(X, y, lemma):
   # train classifier
   if len(set(y)) > 1:
     cv_classif = LogisticRegression(solver="liblinear").fit(X, y)
-    scores = cross_val_score(cv_classif, X, y, cv=2)
+    scores = cross_val_score(cv_classif, X, y, cv=2, scoring="f1_macro")
     return round(scores.mean(),2)
 
   else:
     return float("nan")
+
+# print(len(sense_to_id["aboutir"]))
+# data = df[(df['lemma'] == "aboutir")].reset_index()
+# X, y = get_x_y(data, "aboutir", 300, "ft")
+# print(cv_classification(X, y, "aboutir"))
 
 # Traditional Classification
 def traditional_classification(X_train,X_test,y_train, y_test, lemma):
 
   # train classifier
   if len(set(y_train)) > 1:
-    classifier = LogisticRegression(solver = "liblinear").fit(X_train, y_train)
+    classifier = LogisticRegression(solver = "liblinear", class_weight="balanced").fit(X_train, y_train)
     return round(classifier.score(X_test, y_test), 2)
 
   else:

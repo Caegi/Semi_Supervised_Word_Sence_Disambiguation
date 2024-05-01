@@ -1,5 +1,5 @@
 """## Classification"""
-#%%
+
 """Import"""
 from spacy.lang.fr import French
 import spacy
@@ -13,7 +13,6 @@ from gensim.models import KeyedVectors
 from DataExtraction import *
 import gzip
 import shutil
-#%%
 
 
 # get the pre-trained fast text embeddings for French
@@ -24,7 +23,7 @@ output_file = 'content/cc.fr.300.bin'
 with gzip.open(input_file, 'rb') as f_in:
     with open(output_file, 'wb') as f_out:
         shutil.copyfileobj(f_in, f_out)
-#%%
+
 """Pre-trained Embeddings"""
 # load the different embeddings
 
@@ -34,13 +33,10 @@ ft = fasttext.load_model('../../cc.fr.300.bin')
 w2v = KeyedVectors.load_word2vec_format("../../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
 # glove ???
 
-#%%
 """Data Preparation"""
 # prepare tokenizer
 nlp = French()
 tokenizer = nlp.tokenizer
-
-#%%
 
 # id_to_sense: dictionary --> key = lemma, value = list of senses
 # sense_to_id: dictionary --> key = lemma, values = dictionary --> key = sense, value = index of sense in list id_to_sense[lemma]
@@ -76,7 +72,6 @@ for l in id_to_sense:
 print("id_to_sense", id_to_sense)
 print("sense_to_id", sense_to_id)
 
-#%%
 
 def get_x_y(data, lemma, embedding_size, embedding_type):
 

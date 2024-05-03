@@ -7,13 +7,14 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
+from sklearn.metrics import f1_score
 import pandas as pd
 import fasttext
 from gensim.models import KeyedVectors
 from DataExtraction import *
 import gzip
 import shutil
-
+#%%
 
 # get the pre-trained fast text embeddings for French
 # input_file = 'content/cc.fr.300.bin.gz'
@@ -114,7 +115,7 @@ def cv_classification(X, y, lemma):
   # train classifier
   if len(set(y)) > 1:
     cv_classif = LogisticRegression(solver="liblinear").fit(X, y)
-    scores = cross_val_score(cv_classif, X, y, cv=2, scoring="f1_macro")
+    scores = cross_val_score(cv_classif, X, y, cv=2, scoring="f1_weighted")
     return round(scores.mean(),2)
 
   else:
@@ -130,8 +131,11 @@ def traditional_classification(X_train,X_test,y_train, y_test, lemma):
 
   # train classifier
   if len(set(y_train)) > 1:
-    classifier = LogisticRegression(solver = "liblinear", class_weight="balanced").fit(X_train, y_train)
-    return round(classifier.score(X_test, y_test), 2)
+    classifier = LogisticRegression(solver = "liblinear").fit(X_train, y_train)
+    
+    pred = classifier.predict(X_test)
+    score = f1_score(y_test, pred, average="weighted")
+    return round(float(score), 2)
 
   else:
     return float("nan")
@@ -182,14 +186,23 @@ def compare_embeddings():
 
   return (fast_emb, w2v_emb)
 
+def get_best(x1, x2, names):
+
+  count = [0, 0]
+
+  for i in range(len(x1)):
+    if x1[i] > x2[i]: count[0] += 1
+    else: count[1] += 1
+  
+  print(f"Better f score for \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
+
+
 fast_emb, w2v_emb = compare_embeddings()
 
 trad_classification, cv = compare_split_method()
 
-print("Embedding results")
-print("Fasttext:", fast_emb)
-print("Word2Vec:", w2v_emb)
+print("Embedding results\n")
+get_best(fast_emb, w2v_emb, ["Fasttext", "Word2Vec"])
 
-print("\nClassification results")
-print("70/30 split:", trad_classification)
-print("cross valid:", cv)
+print("\nClassification results\n")
+get_best(trad_classification, cv, ["70/30 split", "Cross Validation"])

@@ -12,19 +12,7 @@ import pandas as pd
 import fasttext
 from gensim.models import KeyedVectors
 from DataExtraction import *
-import gzip
-import shutil
 #%%
-
-# get the pre-trained fast text embeddings for French
-# input_file = 'content/cc.fr.300.bin.gz'
-# output_file = 'content/cc.fr.300.bin'
-
-# # unzip gzip file
-# with gzip.open(input_file, 'rb') as f_in:
-#     with open(output_file, 'wb') as f_out:
-#         shutil.copyfileobj(f_in, f_out)
-
 """Pre-trained Embeddings"""
 # load the different embeddings
 
@@ -43,9 +31,6 @@ tokenizer = nlp.tokenizer
 # id_to_sense: dictionary --> key = lemma, value = list of senses
 # sense_to_id: dictionary --> key = lemma, values = dictionary --> key = sense, value = index of sense in list id_to_sense[lemma]
 
-
-# extractor = DataExtraction()
-# df = extractor.load_saved_file()
 df = pd.read_csv('../fse_data.csv')
 senses = set(df.word_sense.tolist())
 
@@ -92,39 +77,21 @@ def get_x_y(data, lemma, embedding_size, embedding_type):
 
   return X, y
 
-
-
-# def get_x_y_glove(data, lemma):
-
-#   X = np.zeros((len(data), 200))
-#   y = []
-
-#   for count, sentence in enumerate(tokenizer.pipe(data.sentence.tolist())): #type:ignore
-
-#     X[count, :] = w2v.get_mean_vector(sentence.text.lower().split(" "), ignore_missing = True)
-
-#     y.append(sense_to_id[lemma][data.word_sense[count]])
-
-#   return (X, y)
-
 """Classification functions"""
 # Cross validation Classification
-
+from sklearn.model_selection import StratifiedKFold
 def cv_classification(X, y, lemma):
 
+  
+  sk_fold=StratifiedKFold(n_splits=5)
   # train classifier
   if len(set(y)) > 1:
-    cv_classif = LogisticRegression(solver="liblinear").fit(X, y)
-    scores = cross_val_score(cv_classif, X, y, cv=2, scoring="f1_weighted")
-    return round(scores.mean(),2)
+    cv_classif = LogisticRegression(solver="liblinear")#.fit(X, y)
+    mod_score4=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
+    return round(mod_score4.mean(),2)
 
   else:
-    return float("nan")
-
-# print(len(sense_to_id["aboutir"]))
-# data = df[(df['lemma'] == "aboutir")].reset_index()
-# X, y = get_x_y(data, "aboutir", 300, "ft")
-# print(cv_classification(X, y, "aboutir"))
+    return float(0)
 
 # Traditional Classification
 def traditional_classification(X_train,X_test,y_train, y_test, lemma):
@@ -134,11 +101,11 @@ def traditional_classification(X_train,X_test,y_train, y_test, lemma):
     classifier = LogisticRegression(solver = "liblinear").fit(X_train, y_train)
     
     pred = classifier.predict(X_test)
-    score = f1_score(y_test, pred, average="weighted")
+    score = f1_score(y_test, pred, average="micro")
     return round(float(score), 2)
 
   else:
-    return float("nan")
+    return float(0)
 
 
 """Compare functions"""
@@ -188,13 +155,9 @@ def compare_embeddings():
 
 def get_best(x1, x2, names):
 
-  count = [0, 0]
-
-  for i in range(len(x1)):
-    if x1[i] > x2[i]: count[0] += 1
-    else: count[1] += 1
+  count = [round(np.mean(np.asarray(x1)), 3), round(np.mean(np.asarray(x2)),3)]
   
-  print(f"Better f score for \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
+  print(f"Mean f-score over all lemma for: \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
 
 
 fast_emb, w2v_emb = compare_embeddings()

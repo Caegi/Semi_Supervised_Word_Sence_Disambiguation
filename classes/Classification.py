@@ -80,13 +80,13 @@ def get_x_y(data, lemma, embedding_size, embedding_type):
 """Classification functions"""
 # Cross validation Classification
 from sklearn.model_selection import StratifiedKFold
-def cv_classification(X, y, lemma):
+def cv_classification(X, y, nb_splits):
 
   
-  sk_fold=StratifiedKFold(n_splits=5)
+  sk_fold=StratifiedKFold(n_splits=nb_splits)
   # train classifier
   if len(set(y)) > 1:
-    cv_classif = LogisticRegression(solver="liblinear")#.fit(X, y)
+    cv_classif = LogisticRegression(solver="liblinear")
     mod_score4=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
     return round(mod_score4.mean(),2)
 
@@ -94,7 +94,7 @@ def cv_classification(X, y, lemma):
     return float(0)
 
 # Traditional Classification
-def traditional_classification(X_train,X_test,y_train, y_test, lemma):
+def traditional_classification(X_train,X_test,y_train, y_test):
 
   # train classifier
   if len(set(y_train)) > 1:
@@ -126,8 +126,8 @@ def compare_split_method():
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=4) # shuffles data by default before splitting
 
     # train classifiers with different methods
-    trad_classif.append(traditional_classification(X_train, X_test, y_train, y_test, lemma))
-    cv.append(cv_classification(X, y, lemma))
+    trad_classif.append(traditional_classification(X_train, X_test, y_train, y_test))
+    cv.append(cv_classification(X, y, 5))
 
   return (trad_classif, cv)
 
@@ -145,20 +145,55 @@ def compare_embeddings():
 
     # classification with fasttext
     X_fast, y_fast = get_x_y(data, lemma, 300, "ft")
-    fast_emb.append(cv_classification(X_fast, y_fast, lemma))
+    fast_emb.append(cv_classification(X_fast, y_fast, 5))
 
     # classification with word2vec
     X_w2v, y_w2v = get_x_y(data, lemma, 200, "w2v")
-    w2v_emb.append(cv_classification(X_w2v, y_w2v, lemma))
+    w2v_emb.append(cv_classification(X_w2v, y_w2v, 5))
 
   return (fast_emb, w2v_emb)
 
+
+# computes the mean socre over all lemma
 def get_best(x1, x2, names):
 
   count = [round(np.mean(np.asarray(x1)), 3), round(np.mean(np.asarray(x2)),3)]
   
   print(f"Mean f-score over all lemma for: \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
 
+# gives mean score over all lemma for decreasing number of examples (always around 10 test examples)
+def decrease_training_examples():
+  scores = []
+  nb_examples = 50
+  t_size=0.0
+
+  while nb_examples >= 20: 
+
+    scores_per_lemma = []
+    
+    for lemma in id_to_sense.keys():
+
+      # compute data frame with only one lemma
+      data = df[(df['lemma'] == lemma)].reset_index()
+
+      X_total, y = get_x_y(data, lemma, 200, "w2v")
+      
+      if nb_examples < 50:
+        X, X_left_out, y, y_left_out = train_test_split(X_total, y, test_size=t_size, random_state=5)
+      else: X = X_total
+
+      print(X.shape)
+      scores_per_lemma.append(cv_classification(X, y, nb_examples//10))
+
+    scores_np = np.nan_to_num(np.asarray(scores_per_lemma))    
+    scores.append(round(np.mean(scores_np),3))
+    t_size += 0.1
+    nb_examples -= 5
+  print(scores)
+  
+#%%
+
+decrease_training_examples()
 
 fast_emb, w2v_emb = compare_embeddings()
 

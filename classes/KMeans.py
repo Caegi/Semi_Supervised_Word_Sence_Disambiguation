@@ -1,8 +1,12 @@
 import pandas as pd
 import numpy as np
 import spacy
+from sklearn.metrics import f1_score
 
 class kmeans:
+
+  global nlp
+  nlp = spacy.load("fr_core_news_sm")
 
   def __init__(self, df: pd.DataFrame, k: int):
     """
@@ -20,14 +24,14 @@ class kmeans:
   def _init_centroids(self):
     
     prototypes = self.df.groupby('word_sense').apply(lambda x: x.iloc[0, x.columns != 'word_sense'])
-    centroids_array = np.vstack(prototypes['embedding'].values)
+    centroids_array = np.vstack(prototypes['embedding'].values) # type: ignore
     return centroids_array
 
   # Method to calculate new centroids
   def _get_new_centroids(self, cs):
     new_centroids = []
     for c in cs:
-      vectors = np.vstack(self.df.loc[self.df['cluster'] == c, 'embedding'].values)
+      vectors = np.vstack(self.df.loc[self.df['cluster'] == c, 'embedding'].values) # type: ignore
       centroid = np.mean(vectors, axis=0)
       new_centroids.append(centroid)
     return np.array(new_centroids)
@@ -51,8 +55,8 @@ class kmeans:
   def fit(self):
     self.df.loc[:, 'cluster'] = 0
     # Excluding last column which is cluster label
-    self.df.loc[:, 'embedding'] = self.df['sentence'].apply(lambda x: nlp(x).vector)
-    embeddings_array = np.vstack(self.df['embedding'].values)
+    self.df.loc[:, 'embedding'] = self.df['sentence'].apply(lambda x: nlp(x).vector) # type: ignore
+    embeddings_array = np.vstack(self.df['embedding'].values) # type: ignore
     self.centroids = self._init_centroids()
     is_changed = True
 
@@ -72,35 +76,55 @@ class kmeans:
     return self.centroids
 
   def get_dataframe(self):
-    print(self.df)
+    return self.df
 
   def get_distribution(self):
     return self.df['cluster'].value_counts()
+  
+  def evaluate_kmeans(self):
 
-if __name__ == "__main__":
-  global nlp
-  nlp = spacy.load("fr_core_news_sm")
+    predicted_senses = self.get_dataframe()["cluster"].to_list()
+    
+    gold_senses = self.df["word_sense"].str.split("_").str[1].astype(int).to_list()
+    
+
+
+    score = f1_score(gold_senses, predicted_senses, average="micro")
+
+    return score
+
+    
+
+
+
+# if __name__ == "__main__":
+#   global nlp
+#   nlp = spacy.load("fr_core_news_sm")
  
   # Loading Dataset
-  df = pd.read_csv('/home/raymond/Bureau/WSB/fse_data.csv')
+  #df = pd.read_csv('/home/raymond/Bureau/WSB/fse_data.csv')
+  # df = pd.read_csv('fse_data.csv')
 
-  # List of verbs in the Dataset: 66 verbs
-  list_of_verbs = df['lemma'].unique()
 
-  # Testing with the verb "aboutir"
-  for verb in list_of_verbs:
-    verb_df = df[df['lemma'] == verb]
-    print(f"Verb : {verb}")
+  # # List of verbs in the Dataset: 66 verbs
+  # list_of_verbs = df['lemma'].unique()
 
-    # Number of clusters
-    k = len(verb_df['word_sense'].unique())
+  # # Testing with the verb "aboutir"
+  # for verb in list_of_verbs:
+  #   verb_df = df[df['lemma'] == verb]
+  #   print(f"Verb : {verb}")
 
-    # Instantiate KMeans Clustering
-    my_kmeans = kmeans(verb_df, k)
-    my_kmeans.fit()
+  #   # Number of clusters
+  #   k = len(verb_df['word_sense'].unique())
 
-    print(my_kmeans.get_distribution())
+  #   # Instantiate KMeans Clustering
+  #   my_kmeans = kmeans(verb_df, k)
+  #   my_kmeans.fit()
 
+  #   print(my_kmeans.evaluate_kmeans())
+
+#     #print(my_kmeans.get_distribution())
+    
 
   '''
     the number of senses for each word is the number of k 

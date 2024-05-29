@@ -84,11 +84,8 @@ class kmeans:
   def evaluate_kmeans(self):
 
     predicted_senses = self.get_dataframe()["cluster"].to_list()
+    gold_senses = self.df['sense_id'].to_list()
     
-    gold_senses = self.df["word_sense"].str.split("_").str[1].astype(int).to_list()
-    
-
-
     score = f1_score(gold_senses, predicted_senses, average="micro")
 
     return score

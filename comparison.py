@@ -1,16 +1,20 @@
 from classes.KMeans import kmeans
-from classes.Classification import cv_classification, id2sense
-import spacy
+from classes.Classification import cv_classification
+from data_preparation import get_data
 import pandas as pd
 import numpy as np
 
+df = get_data()
+# comparison between WSI and WSD
+
 if __name__ == "__main__":
-#   global nlp
-#   nlp = spacy.load("fr_core_news_sm")
  
   # Loading Dataset
   #df = pd.read_csv('/home/raymond/Bureau/WSB/fse_data.csv')
-  df = pd.read_csv('fse_data.csv')
+  #df = pd.read_csv('fse_data.csv')
+
+  # adding column with id for every sense to the dataframe
+  # df['sense_id'] = df.apply(lookup, axis=1)
 
   # List of verbs in the Dataset: 66 verbs
   list_of_verbs = df['lemma'].unique()
@@ -20,7 +24,7 @@ if __name__ == "__main__":
 
   # Testing with the verb "aboutir"
   for verb in list_of_verbs:
-    verb_df = df[df['lemma'] == verb]
+    verb_df = df[df['lemma'] == verb].reset_index()
     print(f"Verb : {verb}")
 
     # Number of clusters
@@ -36,8 +40,8 @@ if __name__ == "__main__":
     # evaluate classification
     scores_classif.append(cv_classification(verb_df, verb, 5))
 
-  print(f"k-means: {scores_kmeans}")
-  print(f"classif: {scores_classif}\n")
+  # print(f"k-means: {scores_kmeans}")
+  # print(f"classif: {scores_classif}\n")
 
   print(f"mean score k-means: {np.mean(np.asarray(scores_kmeans))}")
   print(f"mean score classif: {np.mean(np.asarray(scores_classif))}")

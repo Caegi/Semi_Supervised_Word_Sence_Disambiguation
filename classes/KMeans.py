@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import spacy
 from sklearn.metrics import f1_score
+from sklearn.metrics.cluster import contingency_matrix
 
 class kmeans:
 
@@ -83,10 +84,18 @@ class kmeans:
   
   def evaluate_kmeans(self):
 
-    predicted_senses = self.get_dataframe()["cluster"].to_list()
-    gold_senses = self.df['sense_id'].to_list()
+    # predicted_senses = self.get_dataframe()["cluster"].to_list()
+    # gold_senses = self.df['sense_id'].to_list()
     
-    score = f1_score(gold_senses, predicted_senses, average="micro")
+    # score = f1_score(gold_senses, predicted_senses, average="micro")
+
+    y = self.df["sense_id"]
+    y_1 = self.get_dataframe()["cluster"]
+
+    M1 = contingency_matrix(y, y_1)
+
+    score = np.sum(np.max(M1, axis=0)) / np.sum(M1) # type: ignore
+
 
     return score
 

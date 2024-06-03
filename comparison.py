@@ -32,14 +32,14 @@ if __name__ == "__main__":
     my_kmeans.fit()
 
     # evaluate clustering
-    scores_kmeans.append(round(my_kmeans.evaluate_kmeans(), 2))
+    scores_kmeans.append(my_kmeans.evaluate_kmeans()) # type: ignore
 
     # evaluate classification
-    scores_classif.append(round(cv_classification(verb_df, verb, 5), 2))
-    
+    scores_classif.append(cv_classification(verb_df, verb, 5))
 
-  print(f"k-means: {scores_kmeans}")
-  print(f"classif: {scores_classif}\n")
+
+  # print(f"k-means: {scores_kmeans}")
+  # print(f"classif: {scores_classif}\n")
 
   print(f"mean score k-means: {np.mean(np.asarray(scores_kmeans))}")
   print(f"mean score classif: {np.mean(np.asarray(scores_classif))}")

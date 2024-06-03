@@ -71,7 +71,7 @@ def cv_classification(df, lemma, nb_splits):
   if len(set(y)) > 1:
     cv_classif = LogisticRegression(solver="liblinear")
     mod_score4=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
-    return round(mod_score4.mean(),2)
+    return mod_score4.mean()
 
   else:
     return float(0)

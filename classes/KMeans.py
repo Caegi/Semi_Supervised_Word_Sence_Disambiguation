@@ -84,17 +84,25 @@ class kmeans:
   
   def evaluate_kmeans(self):
 
-    # predicted_senses = self.get_dataframe()["cluster"].to_list()
-    # gold_senses = self.df['sense_id'].to_list()
-    
-    # score = f1_score(gold_senses, predicted_senses, average="micro")
-
+    # get gold labels and predicted cluster
     y = self.df["sense_id"]
     y_1 = self.get_dataframe()["cluster"]
+    
+    # compute contingency matrix
+    # get class index with most examples per cluster
+    m1 = contingency_matrix(y, y_1)
+    max_indices = np.argmax(m1, axis=0) # type: ignore
 
-    M1 = contingency_matrix(y, y_1)
+    # "replace" (in a new list) the cluster names with predicted class indices
+    y_pred = []
+    for c in y_1.to_list():
+      y_pred.append(max_indices[c])
 
-    score = np.sum(np.max(M1, axis=0)) / np.sum(M1) # type: ignore
+    # compute f-score
+    score = f1_score(y, y_pred, average="micro")
+
+    # Purity au cas où on veut l'utiliser...
+    # score = np.sum(np.max(M1, axis=0)) / np.sum(M1) # type: ignore
 
 
     return score

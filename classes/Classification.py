@@ -62,16 +62,14 @@ def get_x_y(data, lemma, embedding_size, embedding_type):
 """Classification functions"""
 # Cross validation Classification
 from sklearn.model_selection import StratifiedKFold
-def cv_classification(df, lemma, nb_splits):
-
-  X, y = get_x_y_w2v(df)
+def cv_classification(X, y, nb_splits):
   
   sk_fold=StratifiedKFold(n_splits=nb_splits)
   # train classifier
   if len(set(y)) > 1:
     cv_classif = LogisticRegression(solver="liblinear")
-    mod_score4=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
-    return mod_score4.mean()
+    scores=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
+    return scores.mean()
 
   else:
     return float(0)
@@ -153,29 +151,39 @@ def decrease_training_examples():
   nb_examples = 50
   t_size=0.0
 
-  while nb_examples >= 20: 
+  while nb_examples >= 10: 
 
     scores_per_lemma = []
     list_of_verbs = df['lemma'].unique()
+
     for lemma in list_of_verbs:
 
       # compute data frame with only one lemma
       data = df[(df['lemma'] == lemma)].reset_index()
 
+      # get embeddings and gold labels
       X_total, y = get_x_y_w2v(data)
       
+      # exception for case where all training examples are used
+      # decrease training examples with train_test_split and only use test set
       if nb_examples < 50:
         X, X_left_out, y, y_left_out = train_test_split(X_total, y, test_size=t_size, random_state=5)
       else: X = X_total
+      
+      # exception for case when split is smaller than 2
+      # always size test set = 10 except for 15 and 10 examples (test set = 7 and 5 examples)
+      if nb_examples // 10 > 1:
+        split = nb_examples // 10
+      else : split = 2
 
-      print(X.shape)
-      scores_per_lemma.append(cv_classification(X, y, nb_examples//10))
-
+      scores_per_lemma.append(cv_classification(X, y, split))
+    
     scores_np = np.nan_to_num(np.asarray(scores_per_lemma))    
     scores.append(round(np.mean(scores_np),3))
     t_size += 0.1
     nb_examples -= 5
-  print(scores)
+    
+  return scores
 
 # decrease_training_examples()
 

@@ -62,5 +62,21 @@ verb_df["cluster"] = new_cluster
 
 print(verb_df[["sense_id", "cluster"]])
 
+#%%
 
+from classes.Classification import decrease_training_examples
+
+scores = decrease_training_examples()
+
+nb_examples = [50, 45, 40, 35, 30, 25, 20, 15, 10]
+
+print(scores)
+
+#%%
+
+import seaborn as sns
+import pandas as pd
+
+df_decrease = pd.DataFrame({"Number of Examples": nb_examples, "F-Score": scores})
+sns.barplot(df_decrease, x= "Number of Examples", y="F-Score")
 

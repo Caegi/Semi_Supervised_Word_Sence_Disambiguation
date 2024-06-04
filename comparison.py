@@ -1,5 +1,5 @@
 from classes.KMeans import kmeans
-from classes.Classification import cv_classification
+from classes.Classification import cv_classification, get_x_y_w2v
 from data_preparation import get_data
 import pandas as pd
 import numpy as np
@@ -35,7 +35,8 @@ if __name__ == "__main__":
     scores_kmeans.append(my_kmeans.evaluate_kmeans()) # type: ignore
 
     # evaluate classification
-    scores_classif.append(cv_classification(verb_df, verb, 5))
+    X, y = get_x_y_w2v(verb_df)
+    scores_classif.append(cv_classification(X, y, 5))
 
 
   # print(f"k-means: {scores_kmeans}")

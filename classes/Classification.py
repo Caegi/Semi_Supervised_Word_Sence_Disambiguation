@@ -6,12 +6,14 @@ import spacy
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score
 import pandas as pd
 import fasttext
 from gensim.models import KeyedVectors
 from data_preparation import get_data
+from spacy.tokenizer import Tokenizer
 
 """Pre-trained Embeddings"""
 # load the different embeddings
@@ -26,15 +28,24 @@ w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_20
 """Data Preparation"""
 # prepare tokenizer
 nlp = French()
-tokenizer = nlp.tokenizer
+tokenizer : Tokenizer = nlp.tokenizer
 df = get_data()
-def get_x_y_w2v(data):
 
+W2V_EMBED_SIZE = 200 # word2vec embedding size = 200
+
+def get_x_y_w2v(data):
+  """
+  returns sentence embeddings and gold classes for the given sentence data
+  """
   # initialize X and y as zero array and empty list
-  X = np.zeros((len(data), 200))
+  X = np.zeros((len(data), W2V_EMBED_SIZE)) 
   y = []
 
-  for count, doc in enumerate(tokenizer.pipe(data.sentence.tolist())): # type: ignore
+  tokenized_sentences = tokenizer.pipe(data.sentence.tolist()) 
+
+  for count, doc in enumerate(tokenized_sentences): 
+    
+    # ignore_missing avoids error for missing words in w2v vocab
     X[count, :] = w2v.get_mean_vector(doc.text.lower().split(" "), ignore_missing = True)
 
     y.append(data["sense_id"].loc[count])
@@ -49,7 +60,7 @@ def get_x_y(data, lemma, embedding_size, embedding_type):
   y = []
 
   # iterate through the sentences and update X and y
-  for count, doc in enumerate(tokenizer.pipe(data.sentence.tolist())): # type: ignore
+  for count, doc in enumerate(tokenizer.pipe(data.sentence.tolist())):
     if embedding_type == "ft":
       X[count, :] = ft.get_sentence_vector(doc.text)
     elif embedding_type == "w2v":
@@ -61,18 +72,20 @@ def get_x_y(data, lemma, embedding_size, embedding_type):
 
 """Classification functions"""
 # Cross validation Classification
-from sklearn.model_selection import StratifiedKFold
+
 def cv_classification(X, y, nb_splits):
+  """performs cross validation classification and outputs the average over all folds"""
   
   sk_fold=StratifiedKFold(n_splits=nb_splits)
-  # train classifier
+
+  
   if len(set(y)) > 1:
     cv_classif = LogisticRegression(solver="liblinear")
     scores=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
     return scores.mean()
 
   else:
-    return float(0)
+    return 0
 
 # Traditional Classification
 def traditional_classification(X_train,X_test,y_train, y_test):
@@ -86,7 +99,7 @@ def traditional_classification(X_train,X_test,y_train, y_test):
     return round(float(score), 2)
 
   else:
-    return float(0)
+    return 0
 
 
 """Compare functions"""

@@ -79,4 +79,3 @@ import pandas as pd
 
 df_decrease = pd.DataFrame({"Number of Examples": nb_examples, "F-Score": scores})
 sns.barplot(df_decrease, x= "Number of Examples", y="F-Score")
-

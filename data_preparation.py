@@ -69,4 +69,4 @@ def get_data():
 
   return df
 
-get_data().to_csv('./fse_data_w_embeddings.csv')
+#get_data().to_csv('./fse_data_w_embeddings.csv')

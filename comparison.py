@@ -1,12 +1,12 @@
-from classes.kmeans import Kmeans
-from classes.classification import cv_classification, get_x_y_w2v
 from data_preparation import get_data
+from classes.kmeans import Kmeans
+from classes.classification import cv_classification, get_x_y_w2v, compare_embeddings, compare_split_method, get_best, decrease_training_examples
 import pandas as pd
 import numpy as np
 
 
 # get dataset
-df = pd.read_csv("fse_data_w_embeddings.csv")
+df = get_data()
 
 
 # comparison between WSI and WSD
@@ -22,7 +22,6 @@ if __name__ == "__main__":
   # Testing with the verb "aboutir"
   for verb in list_of_verbs:
     verb_df = df[df['lemma'] == verb].reset_index()
-    print(f"Verb : {verb}")
 
     # Number of clusters
     k = len(verb_df['word_sense'].unique())
@@ -46,5 +45,12 @@ if __name__ == "__main__":
   print(f"mean score classif: {np.mean(np.asarray(scores_classif))}")
 
 
+print("Compare split method:")
+trad_classification, cv = compare_split_method(df)
+get_best(trad_classification, cv, ["70/30 split", "Cross Validation"])
 
+print("\nCompare embeddings")
+fast_emb, w2v_emb = compare_embeddings(df)
+get_best(fast_emb, w2v_emb, ["Fasttext", "Word2Vec"])
 
+print(decrease_training_examples(df))

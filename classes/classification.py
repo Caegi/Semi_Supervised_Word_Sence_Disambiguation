@@ -173,15 +173,3 @@ def decrease_training_examples(df):
     
   return scores
 
-# decrease_training_examples()
-
-# fast_emb, w2v_emb = compare_embeddings()
-
-# trad_classification, cv = compare_split_method()
-# print(trad_classification)
-# print(cv)
-# print("Embedding results\n")
-# get_best(fast_emb, w2v_emb, ["Fasttext", "Word2Vec"])
-
-# print("\nClassification results\n")
-# get_best(trad_classification, cv, ["70/30 split", "Cross Validation"])

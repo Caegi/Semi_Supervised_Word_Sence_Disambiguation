@@ -3,7 +3,6 @@ import numpy as np
 import spacy
 from sklearn.metrics import f1_score
 from sklearn.metrics.cluster import contingency_matrix
-from gensim.models import KeyedVectors
 
 class Kmeans:
 

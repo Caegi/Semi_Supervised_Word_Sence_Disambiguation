@@ -91,8 +91,10 @@ from data_preparation import get_data
 data = get_data()
 
 #%%
+import pandas as pd
 
-import numpy as np
-print(len(data))
+data = pd.read_csv("fse_data_w_embeddings")
+
+print(data.head())
 
 

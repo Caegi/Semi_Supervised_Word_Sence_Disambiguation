@@ -6,7 +6,7 @@ import numpy as np
 
 
 # get dataset
-df = get_data()
+df = pd.read_csv("fse_data_w_embeddings.csv")
 
 
 # comparison between WSI and WSD

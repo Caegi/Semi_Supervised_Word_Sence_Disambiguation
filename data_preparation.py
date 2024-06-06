@@ -68,3 +68,5 @@ def get_data():
   df['ft_embeddings'] = ft_embed_column
 
   return df
+
+get_data().to_csv('./fse_data_w_embeddings.csv')

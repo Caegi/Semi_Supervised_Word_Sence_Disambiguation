@@ -1,66 +1,38 @@
 """## Classification"""
 
 """Import"""
-from spacy.lang.fr import French
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score
-from spacy.tokenizer import Tokenizer
 
-"""Pre-trained Embeddings"""
-# load the different embeddings
-
-# fasttext
-
-# word2vec
-
-# glove ???
-
-
-"""Data Preparation"""
-# prepare tokenizer
-nlp = French()
-tokenizer : Tokenizer = nlp.tokenizer
-
-W2V_EMBED_SIZE = 200 # word2vec embedding size = 200
+"""get X and y for classification"""
 
 def get_x_y_w2v(data):
   """
-  returns sentence embeddings and gold classes for the given sentence data
+  returns word2vec sentence embeddings and gold classes for the given sentence data
   """
   # initialize X and y as zero array and empty list
-  X = np.zeros((len(data), W2V_EMBED_SIZE)) 
-  y = []
-
-  tokenized_sentences = tokenizer.pipe(data.sentence.tolist()) 
-
-  for count, doc in enumerate(tokenized_sentences): 
-    
-    # ignore_missing avoids error for missing words in w2v vocab
-    X[count, :] = w2v.get_mean_vector(doc.text.lower().split(" "), ignore_missing = True)
-
-    y.append(data["sense_id"].loc[count])
+  X = np.asarray(data['w2v_embeddings'].to_list()) 
+  y = data['sense_id'].to_list()
 
   return X, y
 
 
-def get_x_y(data, embedding_size, embedding_type):
+def get_x_y(data, embedding_type):
 
-  # initialize X and y as zero array and empty list
-  X = np.zeros((len(data), embedding_size))
-  y = []
+  """
+  return w2v or fasttext sentence embeddings and gold classes for given data
+  """
 
-  # iterate through the sentences and update X and y
-  for count, doc in enumerate(tokenizer.pipe(data.sentence.tolist())):
-    if embedding_type == "ft":
-      X[count, :] = ft.get_sentence_vector(doc.text)
-    elif embedding_type == "w2v":
-      X[count, :] = w2v.get_mean_vector(doc.text.lower().split(" "), ignore_missing = True)
+  if embedding_type == "ft":
+    X = np.asarray(data['ft_embeddings'].to_list()) 
+  elif embedding_type == "w2v":
+    X = np.asarray(data['w2v_embeddings'].to_list()) 
 
-    y.append(data["sense_id"].loc[count])
+  y = data['sense_id'].to_list()
 
   return X, y
 
@@ -100,6 +72,9 @@ def traditional_classification(X_train,X_test,y_train, y_test):
 
 # compare 70/30 splitting with cross validation (fasttext embeddings)
 def compare_split_method(df):
+  """
+  returns the mean f-score for each lemma for cross validation and 70/30 split with w2v embeddings
+  """
 
   trad_classif = []
   cv = []
@@ -111,7 +86,7 @@ def compare_split_method(df):
     data = df[(df['lemma'] == lemma)].reset_index()
       
     # split data into test and train
-    X, y = get_x_y(data, lemma, 200, "w2v")
+    X, y = get_x_y(data, "w2v")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=4) # shuffles data by default before splitting
 
     # train classifiers with different methods
@@ -123,6 +98,9 @@ def compare_split_method(df):
 
 # compare fasttext embeddings with word2vec embeddings (cross validation)
 def compare_embeddings(df):
+  """
+  returns mean score for each lemma for fasttext embeddings and word2vec embeddings (with cross validation)
+  """
 
   fast_emb = []
   w2v_emb = []
@@ -135,11 +113,11 @@ def compare_embeddings(df):
     data = df[(df['lemma'] == lemma)].reset_index()
 
     # classification with fasttext
-    X_fast, y_fast = get_x_y(data, lemma, 300, "ft")
+    X_fast, y_fast = get_x_y(data, "ft")
     fast_emb.append(cv_classification(X_fast, y_fast, 5))
 
     # classification with word2vec
-    X_w2v, y_w2v = get_x_y(data, lemma, 200, "w2v")
+    X_w2v, y_w2v = get_x_y(data, "w2v")
     w2v_emb.append(cv_classification(X_w2v, y_w2v, 5))
 
   return (fast_emb, w2v_emb)
@@ -147,13 +125,16 @@ def compare_embeddings(df):
 
 # computes the mean socre over all lemma
 def get_best(x1, x2, names):
+  """prints the scores for better understanding"""
 
   count = [round(np.mean(np.asarray(x1)), 3), round(np.mean(np.asarray(x2)),3)]
   
   print(f"Mean f-score over all lemma for: \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
 
+
 # gives mean score over all lemma for decreasing number of examples (always around 10 test examples)
 def decrease_training_examples(df):
+  """trains the classifier with decreasing training examples. Returns array with scores."""
   scores = []
   nb_examples = 50
   t_size=0.0

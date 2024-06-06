@@ -87,20 +87,12 @@ plt.gca().invert_xaxis()
 #%%
 
 from data_preparation import get_data
-from spacy.lang.fr import French
-from spacy.tokenizer import Tokenizer
-
-def tokenize(row):
-    
-    
-    return nlp(row.sentence.lower()).text
 
 data = get_data()
 
-nlp = French()
+#%%
 
-#tokenized_sentences = tokenizer.pipe(data.sentence.tolist()) 
+import numpy as np
+print(len(data))
 
-data['sentence'] = data.apply(tokenize, axis=1)
 
-print(data)

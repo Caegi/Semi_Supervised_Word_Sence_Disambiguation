@@ -20,21 +20,19 @@ class Kmeans:
     self.df = df.copy()  # Make a copy to avoid modifying the original DataFrame
     self.k = k
     self.centroids = None
-    self.embeddings = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
-   
 
   # Method to initialize centroids randomly
   def _init_centroids(self):
     
     prototypes = self.df.groupby('word_sense').apply(lambda x: x.iloc[0, x.columns != 'word_sense'])
-    centroids_array = np.vstack(prototypes['embedding'].values) # type: ignore
+    centroids_array = np.vstack(prototypes['w2v_embeddings'].values) # type: ignore
     return centroids_array
 
   # Method to calculate new centroids
   def _get_new_centroids(self, cs):
     new_centroids = []
     for c in cs:
-      vectors = np.vstack(self.df.loc[self.df['cluster'] == c, 'embedding'].values) # type: ignore
+      vectors = np.vstack(self.df.loc[self.df['cluster'] == c, 'w2v_embeddings'].values) # type: ignore
       centroid = np.mean(vectors, axis=0)
       new_centroids.append(centroid)
     return np.array(new_centroids)
@@ -58,8 +56,8 @@ class Kmeans:
   def fit(self):
     self.df.loc[:, 'cluster'] = 0
     # Excluding last column which is cluster label
-    self.df.loc[:, 'embedding'] = self.df['sentence'].apply(lambda x: nlp(x).vector) # type: ignore
-    embeddings_array = np.vstack(self.df['embedding'].values)
+    # self.df'embedding'] = self.df['sentence'].apply(lambda x: nlp(x).vector) # type: ignore
+    embeddings_array = np.asarray(self.df['w2v_embeddings'].to_list())
     self.centroids = self._init_centroids()
     is_changed = True
 

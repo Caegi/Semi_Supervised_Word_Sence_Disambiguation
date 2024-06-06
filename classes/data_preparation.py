@@ -44,6 +44,7 @@ def get_sense_id(row):
     
     return sense_to_id[row['lemma']][row['word_sense']]
 
+
 def tokenize(row):
     '''returns tokenized sentence'''
     
@@ -69,4 +70,5 @@ def get_data():
 
   return df
 
+# export data frame to csv file
 #get_data().to_csv('./fse_data_w_embeddings.csv')

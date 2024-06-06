@@ -1,5 +1,5 @@
 #%%
-from data_preparation import get_data
+from classes.data_preparation import get_data
 import pandas as pd
 import seaborn as sns
 
@@ -19,7 +19,7 @@ print(df)
 from sklearn.metrics.cluster import contingency_matrix
 from seaborn import heatmap
 from classes.kmeans import Kmeans
-from data_preparation import get_data
+from classes.data_preparation import get_data
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -65,7 +65,7 @@ print(verb_df[["sense_id", "cluster"]])
 #%%
 
 from classes.classification import decrease_training_examples
-from data_preparation import get_data
+from classes.data_preparation import get_data
 
 df = get_data()
 scores = decrease_training_examples(df)
@@ -86,15 +86,15 @@ plt.gca().invert_xaxis()
 
 #%%
 
-from data_preparation import get_data
+from classes.data_preparation import get_data
 
 data = get_data()
 
 #%%
-import pandas as pd
+from gensim.models import KeyedVectors
 
-data = pd.read_csv("fse_data_w_embeddings")
+w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
 
-print(data.head())
+print(len(w2v))
 
 

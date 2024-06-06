@@ -1,4 +1,4 @@
-from data_preparation import get_data
+from classes.data_preparation import get_data
 from classes.kmeans import Kmeans
 from classes.classification import cv_classification, get_x_y_w2v, compare_embeddings, compare_split_method, get_best, decrease_training_examples
 import pandas as pd

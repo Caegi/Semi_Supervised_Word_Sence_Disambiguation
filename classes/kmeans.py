@@ -4,7 +4,7 @@ import spacy
 from sklearn.metrics import f1_score
 from sklearn.metrics.cluster import contingency_matrix
 
-class kmeans:
+class Kmeans:
 
   global nlp
   nlp = spacy.load("fr_core_news_sm")

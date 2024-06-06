@@ -1,5 +1,5 @@
-from classes.KMeans import kmeans
-from classes.Classification import cv_classification, get_x_y_w2v
+from classes.kmeans import Kmeans
+from classes.classification import cv_classification, get_x_y_w2v
 from data_preparation import get_data
 import pandas as pd
 import numpy as np
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     k = len(verb_df['word_sense'].unique())
 
     # Instantiate KMeans Clustering
-    my_kmeans = kmeans(verb_df, k)
+    my_kmeans = Kmeans(verb_df, k)
     my_kmeans.fit()
 
     # evaluate clustering
@@ -46,10 +46,5 @@ if __name__ == "__main__":
   print(f"mean score classif: {np.mean(np.asarray(scores_classif))}")
 
 
-    
 
-  '''
-    the number of senses for each word is the number of k 
-    pick a prototype for each sense or (mean) not randomly
-  '''
 

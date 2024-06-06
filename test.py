@@ -18,7 +18,7 @@ print(df)
 
 from sklearn.metrics.cluster import contingency_matrix
 from seaborn import heatmap
-from classes.KMeans import kmeans
+from classes.kmeans import Kmeans
 from data_preparation import get_data
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,7 +30,7 @@ verb = "traduire"
 verb_df = df[df['lemma'] == verb].reset_index()
 k = len(verb_df['word_sense'].unique())
 
-my_kmeans = kmeans(verb_df, k)
+my_kmeans = Kmeans(verb_df, k)
 my_kmeans.fit()
 y = verb_df["sense_id"]
 y_1 = my_kmeans.get_dataframe()["cluster"]
@@ -64,9 +64,11 @@ print(verb_df[["sense_id", "cluster"]])
 
 #%%
 
-from classes.Classification import decrease_training_examples
+from classes.classification import decrease_training_examples
+from data_preparation import get_data
 
-scores = decrease_training_examples()
+df = get_data()
+scores = decrease_training_examples(df)
 
 nb_examples = [50, 45, 40, 35, 30, 25, 20, 15, 10]
 
@@ -76,6 +78,8 @@ print(scores)
 
 import seaborn as sns
 import pandas as pd
+import matplotlib.pyplot as plt
 
 df_decrease = pd.DataFrame({"Number of Examples": nb_examples, "F-Score": scores})
 sns.barplot(df_decrease, x= "Number of Examples", y="F-Score")
+plt.gca().invert_xaxis()

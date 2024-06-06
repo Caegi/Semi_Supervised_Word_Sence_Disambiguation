@@ -29,7 +29,6 @@ w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_20
 # prepare tokenizer
 nlp = French()
 tokenizer : Tokenizer = nlp.tokenizer
-df = get_data()
 
 W2V_EMBED_SIZE = 200 # word2vec embedding size = 200
 
@@ -53,7 +52,7 @@ def get_x_y_w2v(data):
   return X, y
 
 
-def get_x_y(data, lemma, embedding_size, embedding_type):
+def get_x_y(data, embedding_size, embedding_type):
 
   # initialize X and y as zero array and empty list
   X = np.zeros((len(data), embedding_size))
@@ -105,7 +104,7 @@ def traditional_classification(X_train,X_test,y_train, y_test):
 """Compare functions"""
 
 # compare 70/30 splitting with cross validation (fasttext embeddings)
-def compare_split_method():
+def compare_split_method(df):
 
   trad_classif = []
   cv = []
@@ -128,7 +127,7 @@ def compare_split_method():
 
 
 # compare fasttext embeddings with word2vec embeddings (cross validation)
-def compare_embeddings():
+def compare_embeddings(df):
 
   fast_emb = []
   w2v_emb = []
@@ -159,7 +158,7 @@ def get_best(x1, x2, names):
   print(f"Mean f-score over all lemma for: \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
 
 # gives mean score over all lemma for decreasing number of examples (always around 10 test examples)
-def decrease_training_examples():
+def decrease_training_examples(df):
   scores = []
   nb_examples = 50
   t_size=0.0

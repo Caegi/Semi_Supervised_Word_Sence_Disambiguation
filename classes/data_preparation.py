@@ -7,11 +7,11 @@ import fasttext
 nlp = French()
 
 # load data
-df = pd.read_csv('fse_data.csv')
+df = pd.read_csv('../fse_data.csv')
 
 # load static embeddings
-w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
-ft = fasttext.load_model('../cc.fr.300.bin') 
+w2v = KeyedVectors.load_word2vec_format("../../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
+ft = fasttext.load_model('../../cc.fr.300.bin') 
 
 # id_to_sense: dictionary --> key = lemma, value = list of senses
 # sense_to_id: dictionary --> key = lemma, values = dictionary --> key = sense, value = index of sense in list id_to_sense[lemma]

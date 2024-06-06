@@ -1,20 +1,4 @@
 #%%
-from classes.data_preparation import get_data
-import pandas as pd
-import seaborn as sns
-
-df = get_data()
-
-print(df)
-
-# counts = pd.DataFrame(df["lemma"].value_counts())
-# print(counts)
-# ax = sns.countplot(counts, x="lemma")
-# ax.set(xlabel='Number of examples', ylabel='Count')
-
-
-
-#%%
 
 from sklearn.metrics.cluster import contingency_matrix
 from seaborn import heatmap
@@ -61,28 +45,6 @@ for c in y_1.to_list():
 verb_df["cluster"] = new_cluster
 
 print(verb_df[["sense_id", "cluster"]])
-
-#%%
-
-from classes.classification import decrease_training_examples
-from classes.data_preparation import get_data
-
-df = get_data()
-scores = decrease_training_examples(df)
-
-nb_examples = [50, 45, 40, 35, 30, 25, 20, 15, 10]
-
-print(scores)
-
-#%%
-
-import seaborn as sns
-import pandas as pd
-import matplotlib.pyplot as plt
-
-df_decrease = pd.DataFrame({"Number of Examples": nb_examples, "F-Score": scores})
-sns.barplot(df_decrease, x= "Number of Examples", y="F-Score")
-plt.gca().invert_xaxis()
 
 #%%
 

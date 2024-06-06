@@ -1,37 +1,33 @@
 #%%
-
+from classification import decrease_training_examples
+from data_preparation import get_data
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 #%%
-df = pd.read_csv('../fse_data.csv')
-list_lemma = list(set(df.lemma.tolist()))
-
-
-
-#%%
-# get table with nb examples per word sense
-for lemma in list_lemma:
-  print("lemma:",lemma)
-  df_lemma = df[(df['lemma'] == lemma)].reset_index()
-  print(df_lemma["word_sense"].value_counts())
-  print("")
-
+df = get_data()
 #%%
 
-# try to visualize, not very clear
+# count number of examples per lemma
 
-df["word_sense"] = df["word_sense"].str.split("_").str[1]
-cols = 2
-rows = len(list_lemma)//2
-fig, axes = plt.subplots(rows, cols, figsize = (10, 30)) # type: ignore
-axes = axes.flat
+counts = pd.DataFrame(df["lemma"].value_counts())
+# print(counts)
+ax = sns.countplot(counts, x="lemma")
+ax.set(xlabel='Number of examples', ylabel='Count')
+ax.bar_label(ax.containers[0])
 
-for i in range(len(list_lemma)):
-  df_lemma = df[(df['lemma'] == list_lemma[i])].reset_index()
-  #labels = df_lemma['word_sense']
-  plot = sns.countplot(df_lemma, x="word_sense", ax = axes[i])
-#   plot.set_xticklabels(labels, rotation=20)
-#   plot.set_yticklabels(labels, rotation=20)
-  axes[i].set_title(f'{list_lemma[i]}')
+#%%
+# visualize f-score for decreasing examples
 
+scores = decrease_training_examples(df)
+
+nb_examples = [50, 45, 40, 35, 30, 25, 20, 15, 10]
+
+print(scores)
+
+#%%
+
+df_decrease = pd.DataFrame({"Number of Examples": nb_examples, "F-Score": scores})
+ax = sns.barplot(df_decrease, x= "Number of Examples", y="F-Score")
+plt.gca().invert_xaxis()
+ax.bar_label(ax.containers[0])

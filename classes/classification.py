@@ -2,26 +2,21 @@
 
 """Import"""
 from spacy.lang.fr import French
-import spacy
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score
-import pandas as pd
-import fasttext
-from gensim.models import KeyedVectors
-from data_preparation import get_data
 from spacy.tokenizer import Tokenizer
 
 """Pre-trained Embeddings"""
 # load the different embeddings
 
 # fasttext
-ft = fasttext.load_model('../cc.fr.300.bin') 
+
 # word2vec
-w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
+
 # glove ???
 
 

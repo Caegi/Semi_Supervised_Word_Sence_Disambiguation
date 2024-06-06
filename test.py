@@ -83,3 +83,24 @@ import matplotlib.pyplot as plt
 df_decrease = pd.DataFrame({"Number of Examples": nb_examples, "F-Score": scores})
 sns.barplot(df_decrease, x= "Number of Examples", y="F-Score")
 plt.gca().invert_xaxis()
+
+#%%
+
+from data_preparation import get_data
+from spacy.lang.fr import French
+from spacy.tokenizer import Tokenizer
+
+def tokenize(row):
+    
+    
+    return nlp(row.sentence.lower()).text
+
+data = get_data()
+
+nlp = French()
+
+#tokenized_sentences = tokenizer.pipe(data.sentence.tolist()) 
+
+data['sentence'] = data.apply(tokenize, axis=1)
+
+print(data)

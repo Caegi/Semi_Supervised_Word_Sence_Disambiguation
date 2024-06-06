@@ -3,6 +3,7 @@ import numpy as np
 import spacy
 from sklearn.metrics import f1_score
 from sklearn.metrics.cluster import contingency_matrix
+from gensim.models import KeyedVectors
 
 class Kmeans:
 
@@ -19,6 +20,7 @@ class Kmeans:
     self.df = df.copy()  # Make a copy to avoid modifying the original DataFrame
     self.k = k
     self.centroids = None
+    self.embeddings = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
    
 
   # Method to initialize centroids randomly
@@ -57,7 +59,7 @@ class Kmeans:
     self.df.loc[:, 'cluster'] = 0
     # Excluding last column which is cluster label
     self.df.loc[:, 'embedding'] = self.df['sentence'].apply(lambda x: nlp(x).vector) # type: ignore
-    embeddings_array = np.vstack(self.df['embedding'].values) # type: ignore
+    embeddings_array = np.vstack(self.df['embedding'].values)
     self.centroids = self._init_centroids()
     is_changed = True
 

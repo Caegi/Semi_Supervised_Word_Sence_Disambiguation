@@ -7,6 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score
+from sklearn.model_selection import StratifiedShuffleSplit
 
 """get X and y for classification"""
 
@@ -45,8 +46,8 @@ def cv_classification(X, y, nb_splits):
   sk_fold=StratifiedKFold(n_splits=nb_splits)
 
   
-  if len(set(y)) > 1:
-    cv_classif = LogisticRegression(solver="liblinear")
+  if len(set(y)) > 1: # make sure that the lemma has at least two different sense
+    cv_classif = LogisticRegression(multi_class='multinomial')
     scores=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
     return scores.mean()
 
@@ -86,7 +87,7 @@ def compare_split_method(df):
     data = df[(df['lemma'] == lemma)].reset_index()
       
     # split data into test and train
-    X, y = get_x_y(data, "w2v")
+    X, y = get_x_y(data, "ft")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=4) # shuffles data by default before splitting
 
     # train classifiers with different methods
@@ -136,40 +137,63 @@ def get_best(x1, x2, names):
 def decrease_training_examples(df):
   """trains the classifier with decreasing training examples. Returns array with scores."""
   scores = []
-  nb_examples = 50
+  should_be_nb = 50
   t_size=0.0
 
-  while nb_examples >= 10: 
+  while should_be_nb >= 10: 
 
     scores_per_lemma = []
     list_of_verbs = df['lemma'].unique()
 
     for lemma in list_of_verbs:
+      print(f"Lemma: {lemma} with {(1-t_size) * 100}% of examples")
 
       # compute data frame with only one lemma
       data = df[(df['lemma'] == lemma)].reset_index()
 
+      # make sure every class occurs at least 2 times
+      # so that every class occurs in our decreased train set
+      #data=data[data.groupby('sense_id').sense_id.transform(len)>1]
+      
       # get embeddings and gold labels
-      X_total, y = get_x_y_w2v(data)
+      X_total, y_total = get_x_y(data, "ft")
       
       # exception for case where all training examples are used
       # decrease training examples with train_test_split and only use test set
-      if nb_examples < 50:
-        X, X_left_out, y, y_left_out = train_test_split(X_total, y, test_size=t_size, random_state=5)
-      else: X = X_total
-      
+      if should_be_nb < 50:
+        X, X_left_out, y, y_left_out = train_test_split(X_total, y_total, test_size=t_size, random_state=5)
+        
+        # try to get all classes in the decreasing k-fold
+        # sss=StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
+        # train_split = [train for train, test in sss.split(X_total, y_total)]
+        # X = X_total[train_split]
+        # train_split = train_split[0].tolist()
+        # y = [y_total[i] for i in train_split]
+
+
+      else: 
+        X = X_total
+        y = y_total
+
+      real_nb = X.shape[0]
+      #print(f"Number of senses in total: {len(set(y_total))}\nNumber of senses in smaller set: {len(set(y))}")
+
       # exception for case when split is smaller than 2
       # always size test set = 10 except for 15 and 10 examples (test set = 7 and 5 examples)
-      if nb_examples // 10 > 1:
-        split = nb_examples // 10
+
+      if real_nb // 10 > 1:
+        split = real_nb // 10
       else : split = 2
+
+      print(f"{real_nb} examples.\nK-fold with {split} splits")
+      
 
       scores_per_lemma.append(cv_classification(X, y, split))
     
     scores_np = np.nan_to_num(np.asarray(scores_per_lemma))    
     scores.append(round(np.mean(scores_np),3))
     t_size += 0.1
-    nb_examples -= 5
+    should_be_nb -= 5
     
   return scores
 

@@ -48,15 +48,32 @@ print(verb_df[["sense_id", "cluster"]])
 
 #%%
 
-from classes.data_preparation import get_data
+#from classes.data_preparation import get_data
+import pandas as pd
+import numpy as np
 
-data = get_data()
+data = pd.read_csv("fse_data_w_embeddings.csv")
+data.astype({'ft_embeddings': 'numpy.dtype'})
 
 #%%
-from gensim.models import KeyedVectors
 
-w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
+verb_df = data[data['lemma'] == "aboutir"].reset_index()
+print(verb_df)
+verb_df=verb_df[verb_df.groupby('sense_id').sense_id.transform(len)>1]
+print(verb_df)
 
-print(len(w2v))
+#%%
+from classes.classification import get_x_y
+from sklearn.model_selection import StratifiedShuffleSplit
+import numpy as np
 
+X_total, y_total = get_x_y(verb_df, "ft")
 
+sss=StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
+train_split = [train for train, test in sss.split(X_total, y_total)]
+print(X_total[train_split])
+train_split = train_split[0].tolist()
+print(train_split)
+print([y_total[i] for i in train_split])
+
+# %%

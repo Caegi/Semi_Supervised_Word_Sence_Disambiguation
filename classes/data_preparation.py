@@ -7,11 +7,11 @@ import fasttext
 nlp = French()
 
 # load data
-df = pd.read_csv('../fse_data.csv')
+df = pd.read_csv('fse_data.csv')
 
 # load static embeddings
-w2v = KeyedVectors.load_word2vec_format("../../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
-ft = fasttext.load_model('../../cc.fr.300.bin') 
+w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
+ft = fasttext.load_model('../cc.fr.300.bin') 
 
 # id_to_sense: dictionary --> key = lemma, value = list of senses
 # sense_to_id: dictionary --> key = lemma, values = dictionary --> key = sense, value = index of sense in list id_to_sense[lemma]
@@ -45,10 +45,10 @@ def get_sense_id(row):
     return sense_to_id[row['lemma']][row['word_sense']]
 
 
-def tokenize(row):
-    '''returns tokenized sentence'''
+# def tokenize(row):
+#     '''returns tokenized sentence'''
     
-    return nlp(row.sentence.lower()).text
+#     return nlp(row.sentence.lower()).text
 
 
 def get_data():
@@ -57,8 +57,8 @@ def get_data():
   # add sense id to every sense
   df['sense_id'] = df.apply(get_sense_id, axis=1)
 
-  # tokenize sentences
-  df['sentence'] = df.apply(tokenize, axis=1)
+  # get only lower characters for sentences
+  df['sentence'] = df['sentence'].str.lower()
 
   # add column with word2vec embeddings
   w2v_embed_column = [w2v.get_mean_vector(row['sentence']) for _, row in df.iterrows()]

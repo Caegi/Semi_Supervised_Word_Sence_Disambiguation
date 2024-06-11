@@ -11,6 +11,7 @@ df = pd.read_csv('fse_data.csv')
 
 # load static embeddings
 w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
+glove = KeyedVectors.load_word2vec_format('../vectors_glov_w2v.txt', binary=False)
 ft = fasttext.load_model('../cc.fr.300.bin') 
 
 # id_to_sense: dictionary --> key = lemma, value = list of senses
@@ -63,12 +64,17 @@ def get_data():
   # add column with word2vec embeddings
   w2v_embed_column = [w2v.get_mean_vector(row['sentence']) for _, row in df.iterrows()]
   df['w2v_embeddings'] = w2v_embed_column
+  
 
   # add column with fasttext embeddings
   ft_embed_column = [ft.get_sentence_vector(row['sentence']) for _, row in df.iterrows()]
   df['ft_embeddings'] = ft_embed_column
 
+  glove_embed_column = [glove.get_mean_vector(row['sentence']) for _, row in df.iterrows()]
+  df['glove_embeddings'] = glove_embed_column
+
   return df
 
-# export data frame to csv file
-#get_data().to_csv('./fse_data_w_embeddings.csv')
+# export data frame to json file
+#get_data().to_json('./fse_data_w_embeddings.json')
+

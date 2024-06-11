@@ -52,28 +52,13 @@ print(verb_df[["sense_id", "cluster"]])
 import pandas as pd
 import numpy as np
 
-data = pd.read_csv("fse_data_w_embeddings.csv")
-data.astype({'ft_embeddings': 'numpy.dtype'})
+data = pd.read_json("fse_data_w_embeddings.json")#, dtype={'ft_embeddings': np.float32})
+#data['ft_embeddings'] = data["ft_embeddings"].astype(np.float32)
+print(type(data["ft_embeddings"][0]))
 
-#%%
-
-verb_df = data[data['lemma'] == "aboutir"].reset_index()
-print(verb_df)
-verb_df=verb_df[verb_df.groupby('sense_id').sense_id.transform(len)>1]
-print(verb_df)
-
-#%%
-from classes.classification import get_x_y
-from sklearn.model_selection import StratifiedShuffleSplit
-import numpy as np
-
-X_total, y_total = get_x_y(verb_df, "ft")
-
-sss=StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
-train_split = [train for train, test in sss.split(X_total, y_total)]
-print(X_total[train_split])
-train_split = train_split[0].tolist()
-print(train_split)
-print([y_total[i] for i in train_split])
 
 # %%
+
+from classes.data_preparation import get_data
+
+df = get_data()

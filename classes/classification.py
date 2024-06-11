@@ -32,6 +32,8 @@ def get_x_y(data, embedding_type):
     X = np.asarray(data['ft_embeddings'].to_list()) 
   elif embedding_type == "w2v":
     X = np.asarray(data['w2v_embeddings'].to_list()) 
+  elif embedding_type == "glov":
+    X = np.asarray(data['glove_embeddings'].to_list())
 
   y = data['sense_id'].to_list()
 
@@ -105,6 +107,7 @@ def compare_embeddings(df):
 
   fast_emb = []
   w2v_emb = []
+  glov_emb = []
 
   list_of_verbs = df['lemma'].unique()
 
@@ -121,7 +124,12 @@ def compare_embeddings(df):
     X_w2v, y_w2v = get_x_y(data, "w2v")
     w2v_emb.append(cv_classification(X_w2v, y_w2v, 5))
 
-  return (fast_emb, w2v_emb)
+    # classification with glove
+    X_glov, y_glov = get_x_y(data, "glov")
+    glov_emb.append(cv_classification(X_glov, y_glov, 5))
+
+
+  return (fast_emb, w2v_emb, glov_emb)
 
 
 # computes the mean socre over all lemma

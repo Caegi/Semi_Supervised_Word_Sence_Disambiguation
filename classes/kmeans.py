@@ -20,11 +20,10 @@ class Kmeans:
     self.k = k
     self.centroids = None
 
-  # Method to initialize centroids randomly
   def _init_centroids(self):
-    
-    prototypes = self.df.groupby('word_sense').apply(lambda x: x.iloc[0, x.columns != 'word_sense'])
-    centroids_array = np.vstack(prototypes['w2v_embeddings'].values) # type: ignore
+    random_indices = np.random.choice(range(len(self.df)), size=self.k, replace=False)
+    centroids_df = self.df.iloc[random_indices]
+    centroids_array = np.vstack(centroids_df['w2v_embeddings'].values)
     return centroids_array
 
   # Method to calculate new centroids
@@ -81,7 +80,7 @@ class Kmeans:
   def get_distribution(self):
     return self.df['cluster'].value_counts()
   
-  def evaluate_kmeans(self):
+  def evaluate(self):
 
     # get gold labels and predicted cluster
     y = self.df["sense_id"]
@@ -108,38 +107,11 @@ class Kmeans:
 
     
 
-
-
-# if __name__ == "__main__":
-#   global nlp
-#   nlp = spacy.load("fr_core_news_sm")
- 
-  # Loading Dataset
-  #df = pd.read_csv('/home/raymond/Bureau/WSB/fse_data.csv')
-  # df = pd.read_csv('fse_data.csv')
-
-
-  # # List of verbs in the Dataset: 66 verbs
-  # list_of_verbs = df['lemma'].unique()
-
-  # # Testing with the verb "aboutir"
-  # for verb in list_of_verbs:
-  #   verb_df = df[df['lemma'] == verb]
-  #   print(f"Verb : {verb}")
-
-  #   # Number of clusters
-  #   k = len(verb_df['word_sense'].unique())
-
-  #   # Instantiate KMeans Clustering
-  #   my_kmeans = kmeans(verb_df, k)
-  #   my_kmeans.fit()
-
-  #   print(my_kmeans.evaluate_kmeans())
-
-#     #print(my_kmeans.get_distribution())
-    
-
-  '''
-    the number of senses for each word is the number of k 
-    pick a prototype for each sense or (mean) not randomly
-  '''
+class KmeansConstraint(Kmeans):
+  
+  # Override
+  # Method to initialize centroids with first example of each unique word sense in the verb dataframe
+  def _init_centroids(self):
+    prototypes = self.df.groupby('word_sense').apply(lambda x: x.iloc[0, x.columns != 'word_sense'])
+    centroids_array = np.vstack(prototypes['w2v_embeddings'].values) # type: ignore
+    return centroids_array

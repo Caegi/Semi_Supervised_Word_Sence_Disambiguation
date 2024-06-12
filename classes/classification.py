@@ -71,7 +71,12 @@ def traditional_classification(X_train,X_test,y_train, y_test):
     return 0
 
 
-"""Compare functions"""
+'''
+Compare functions for the classification. 
+We compared: 
+- the evaluation: 70 / 30 split with cross validation (5 folds)
+- the static embeddings: FastText, Word2Vec and (self-trained) GloVe
+'''
 
 # compare 70/30 splitting with cross validation (fasttext embeddings)
 def compare_split_method(df):
@@ -96,7 +101,7 @@ def compare_split_method(df):
     trad_classif.append(traditional_classification(X_train, X_test, y_train, y_test))
     cv.append(cv_classification(X, y, 5))
 
-  return (trad_classif, cv)
+  return (round(np.mean(np.asarray(trad_classif)),3), round(np.mean(np.asarray(cv)),3))
 
 
 # compare fasttext embeddings with word2vec embeddings (cross validation)
@@ -129,16 +134,16 @@ def compare_embeddings(df):
     glov_emb.append(cv_classification(X_glov, y_glov, 5))
 
 
-  return (fast_emb, w2v_emb, glov_emb)
+  return (round(np.mean(np.asarray(fast_emb)),3), round(np.mean(np.asarray(w2v_emb)),3), round(np.mean(np.asarray(glov_emb)),3))
 
 
 # computes the mean socre over all lemma
-def get_best(x1, x2, names):
+def get_best(scores, names):
   """prints the scores for better understanding"""
-
-  count = [round(np.mean(np.asarray(x1)), 3), round(np.mean(np.asarray(x2)),3)]
   
-  print(f"Mean f-score over all lemma for: \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
+  print(f"Mean f-score over all lemma for:")
+  for i in range(len(scores)):
+    print(f"{names[i]}: {scores[i]}")
 
 
 # gives mean score over all lemma for decreasing number of examples (always around 10 test examples)

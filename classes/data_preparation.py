@@ -2,11 +2,11 @@ import pandas as pd
 from gensim.models import KeyedVectors
 from spacy.lang.fr import French
 import fasttext
-from classes.data_extraction import *
+#from classes.data_extraction import *
 
-# extract data and save the result in the file fse_data.csv
-data_extract =  DataExtraction()
-data_extract.extract_data()
+# # extract data and save the result in the file fse_data.csv
+# data_extract =  DataExtraction()
+# data_extract.extract_data()
 
 # initialize tokenizer
 nlp = French()

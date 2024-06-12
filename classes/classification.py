@@ -7,6 +7,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score
+import warnings
+from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.model_selection import StratifiedShuffleSplit
 
 """get X and y for classification"""
@@ -30,10 +32,15 @@ def get_x_y(data, embedding_type):
 
   if embedding_type == "ft":
     X = np.asarray(data['ft_embeddings'].to_list()) 
+
   elif embedding_type == "w2v":
     X = np.asarray(data['w2v_embeddings'].to_list()) 
   elif embedding_type == "glov":
     X = np.asarray(data['glove_embeddings'].to_list())
+
+  elif embedding_type == "tf_idf":
+    X = np.asarray(data['tf_idf_embeddings'].to_list())
+    X = np.vstack(X)
 
   y = data['sense_id'].to_list()
 
@@ -47,6 +54,10 @@ def cv_classification(X, y, nb_splits):
   
   sk_fold=StratifiedKFold(n_splits=nb_splits)
 
+  warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.model_selection._split")
+
+  if len(set(y)) > 1:
+    cv_classif = LogisticRegression(multi_class='multinomial')
   
   if len(set(y)) > 1: # make sure that the lemma has at least two different sense
     cv_classif = LogisticRegression(multi_class='multinomial')
@@ -71,6 +82,12 @@ def traditional_classification(X_train,X_test,y_train, y_test):
     return 0
 
 
+'''
+Compare functions for the classification. 
+We compared: 
+- the evaluation: 70 / 30 split with cross validation (5 folds)
+- the static embeddings: FastText, Word2Vec and (self-trained) GloVe
+'''
 '''
 Compare functions for the classification. 
 We compared: 
@@ -102,6 +119,7 @@ def compare_split_method(df):
     cv.append(cv_classification(X, y, 5))
 
   return (round(np.mean(np.asarray(trad_classif)),3), round(np.mean(np.asarray(cv)),3))
+  return (round(np.mean(np.asarray(trad_classif)),3), round(np.mean(np.asarray(cv)),3))
 
 
 # compare fasttext embeddings with word2vec embeddings (cross validation)
@@ -113,6 +131,7 @@ def compare_embeddings(df):
   fast_emb = []
   w2v_emb = []
   glov_emb = []
+  tf_idf_emb = []
 
   list_of_verbs = df['lemma'].unique()
 
@@ -133,6 +152,9 @@ def compare_embeddings(df):
     X_glov, y_glov = get_x_y(data, "glov")
     glov_emb.append(cv_classification(X_glov, y_glov, 5))
 
+    # # classification with tf_idf
+    # X_tf_idf, y_tf_idf = get_x_y(data, "tf_idf")
+    # tf_idf_emb.append(cv_classification(X_tf_idf, y_tf_idf, 5))
 
   return (round(np.mean(np.asarray(fast_emb)),3), round(np.mean(np.asarray(w2v_emb)),3), round(np.mean(np.asarray(glov_emb)),3))
 
@@ -144,6 +166,10 @@ def get_best(scores, names):
   print(f"Mean f-score over all lemma for:")
   for i in range(len(scores)):
     print(f"{names[i]}: {scores[i]}")
+  
+  print(f"Mean f-score over all lemma for:")
+  for i in range(len(scores)):
+    print(f"{names[i]}: {scores[i]}")
 
 
 # gives mean score over all lemma for decreasing number of examples (always around 10 test examples)
@@ -151,14 +177,17 @@ def decrease_training_examples(df):
   """trains the classifier with decreasing training examples. Returns array with scores."""
   scores = []
   should_be_nb = 50
+  should_be_nb = 50
   t_size=0.0
 
+  while should_be_nb >= 10: 
   while should_be_nb >= 10: 
 
     scores_per_lemma = []
     list_of_verbs = df['lemma'].unique()
 
     for lemma in list_of_verbs:
+      print(f"Lemma: {lemma} with {(1-t_size) * 100}% of examples")
       print(f"Lemma: {lemma} with {(1-t_size) * 100}% of examples")
 
       # compute data frame with only one lemma
@@ -168,11 +197,35 @@ def decrease_training_examples(df):
       # so that every class occurs in our decreased train set
       #data=data[data.groupby('sense_id').sense_id.transform(len)>1]
       
+
+      # make sure every class occurs at least 2 times
+      # so that every class occurs in our decreased train set
+      #data=data[data.groupby('sense_id').sense_id.transform(len)>1]
+      
       # get embeddings and gold labels
+      X_total, y_total = get_x_y(data, "ft")
       X_total, y_total = get_x_y(data, "ft")
       
       # exception for case where all training examples are used
       # decrease training examples with train_test_split and only use test set
+      if should_be_nb < 50:
+        X, X_left_out, y, y_left_out = train_test_split(X_total, y_total, test_size=t_size, random_state=5)
+        
+        # try to get all classes in the decreasing k-fold
+        # sss=StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
+        # train_split = [train for train, test in sss.split(X_total, y_total)]
+        # X = X_total[train_split]
+        # train_split = train_split[0].tolist()
+        # y = [y_total[i] for i in train_split]
+
+
+      else: 
+        X = X_total
+        y = y_total
+
+      real_nb = X.shape[0]
+      #print(f"Number of senses in total: {len(set(y_total))}\nNumber of senses in smaller set: {len(set(y))}")
+
       if should_be_nb < 50:
         X, X_left_out, y, y_left_out = train_test_split(X_total, y_total, test_size=t_size, random_state=5)
         
@@ -196,7 +249,13 @@ def decrease_training_examples(df):
 
       if real_nb // 10 > 1:
         split = real_nb // 10
+
+      if real_nb // 10 > 1:
+        split = real_nb // 10
       else : split = 2
+
+      print(f"{real_nb} examples.\nK-fold with {split} splits")
+      
 
       print(f"{real_nb} examples.\nK-fold with {split} splits")
       
@@ -206,6 +265,7 @@ def decrease_training_examples(df):
     scores_np = np.nan_to_num(np.asarray(scores_per_lemma))    
     scores.append(round(np.mean(scores_np),3))
     t_size += 0.1
+    should_be_nb -= 5
     should_be_nb -= 5
     
   return scores

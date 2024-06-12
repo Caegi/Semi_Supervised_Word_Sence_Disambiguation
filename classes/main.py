@@ -1,8 +1,8 @@
 #from comparison import compare
 from classes.classification import get_best, compare_embeddings, compare_split_method
 from classes.kmeans import wsi_compare_embeddings
-from comparison import compare
-import arg_parser as a
+from classes.comparison import compare
+import classes.arg_parser as a
 import pandas as pd
 
 df = pd.read_json("fse_data_w_embeddings.json")

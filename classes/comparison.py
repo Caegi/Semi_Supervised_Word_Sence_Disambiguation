@@ -1,5 +1,5 @@
-from classes.kmeans import Kmeans, KmeansConstraint
-from classes.classification import cv_classification, get_x_y
+from kmeans import Kmeans, KmeansConstraint
+from classification import cv_classification, get_x_y, cv_classification_tf_idf
 import numpy as np
 
 
@@ -16,6 +16,7 @@ def compare(df):
   scores_kmeans = []
   scores_kmeans_constr = []
   scores_classif = []
+  scores_classif_tfidf = []
 
   # loop through the verbs, we classify and cluster for each verb
   for verb in list_of_verbs:
@@ -40,8 +41,13 @@ def compare(df):
     X, y = get_x_y(verb_df, "ft")
     scores_classif.append(cv_classification(X, y, 5))
 
+    # evaluate tf_idf
+    l_sentences = verb_df["sentence"].to_list()
+    scores_classif_tfidf.append(cv_classification_tf_idf(l_sentences, y, 5))
+
 
   print(f"mean score k-means: {np.mean(np.asarray(scores_kmeans))}")
   print(f"mean score k-means constraint: {np.mean(np.asarray(scores_kmeans_constr))}")
   print(f"mean score classif: {np.mean(np.asarray(scores_classif))}")
+  print(f"mean score tf_idf classif: {np.mean(np.asarray(scores_classif_tfidf))}")
 

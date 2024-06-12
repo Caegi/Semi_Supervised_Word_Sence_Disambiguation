@@ -48,6 +48,7 @@ print(verb_df[["sense_id", "cluster"]])
 
 #%%
 
+<<<<<<< HEAD
 from classes.data_preparation import get_data
 
 data = get_data()
@@ -60,3 +61,19 @@ w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_20
 print(len(w2v))
 
 
+=======
+#from classes.data_preparation import get_data
+import pandas as pd
+import numpy as np
+
+data = pd.read_json("fse_data_w_embeddings.json")#, dtype={'ft_embeddings': np.float32})
+#data['ft_embeddings'] = data["ft_embeddings"].astype(np.float32)
+print(type(data["ft_embeddings"][0]))
+
+
+# %%
+
+from classes.data_preparation import get_data
+
+df = get_data()
+>>>>>>> 34ffb0d (merged main and master)

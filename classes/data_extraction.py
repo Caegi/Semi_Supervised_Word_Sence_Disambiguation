@@ -90,7 +90,10 @@ class DataExtraction:
 
   def get_word_sense_and_lemma(self, filepath_ws):
     """
+<<<<<<< HEAD
 
+=======
+>>>>>>> 34ffb0d (merged main and master)
     Parameters:
       filepath_ws: textfile containing the target words appearing in the xml file
       in order and their gold labels (word sense in the context of the sentence)
@@ -111,7 +114,11 @@ class DataExtraction:
       return l_word_sense, l_lemma
 
   def extract_data(self):
+<<<<<<< HEAD
     #get_df_from_xml("/content/FSE-1.1.data.xml", "/content/FSE-1.1.gold.key.txt")
+=======
+    # get_df_from_xml("/content/FSE-1.1.data.xml", "/content/FSE-1.1.gold.key.txt")
+>>>>>>> 34ffb0d (merged main and master)
     df = self.get_df_from_xml("content/FSE-1.1-191210/FSE-1.1.data.xml", "content/FSE-1.1-191210/FSE-1.1.gold.key.txt")
     df.to_csv('fse_data.csv', index=False)
 

@@ -10,19 +10,11 @@ from sklearn.metrics import f1_score
 import warnings
 from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import make_pipeline
 
 """get X and y for classification"""
-
-def get_x_y_w2v(data):
-  """
-  returns word2vec sentence embeddings and gold classes for the given sentence data
-  """
-  # initialize X and y as zero array and empty list
-  X = np.asarray(data['w2v_embeddings'].to_list()) 
-  y = data['sense_id'].to_list()
-
-  return X, y
-
 
 def get_x_y(data, embedding_type):
 
@@ -39,31 +31,66 @@ def get_x_y(data, embedding_type):
   elif embedding_type == "glov":
     X = np.asarray(data['glove_embeddings'].to_list()) 
 
-  elif embedding_type == "tf_idf":
-    X = np.asarray(data['tf_idf_embeddings'].to_list())
-    X = np.vstack(X)
-
   y = data['sense_id'].to_list()
 
   return X, y
 
 """Classification functions"""
-# Cross validation Classification
 
+# Cross validation Classification
 def cv_classification(X, y, nb_splits):
-  """performs cross validation classification and outputs the average over all folds"""
+  """performs cross validation classification and outputs the average over all folds
   
-  sk_fold=StratifiedKFold(n_splits=nb_splits)
+  y: list[int]
+  """
+  
+  sk_fold = StratifiedKFold(n_splits=nb_splits)
 
   warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.model_selection._split")
 
   if len(set(y)) > 1:
-    cv_classif = LogisticRegression(multi_class='multinomial')
-    scores=cross_val_score(cv_classif,X,y,cv=sk_fold, scoring="f1_micro")
+    cv_classif = MLPClassifier(max_iter=300, hidden_layer_sizes=(300,))
+    scores = cross_val_score(cv_classif, X, y, cv=sk_fold, scoring="f1_micro")
     return scores.mean()
 
   else:
     return 0
+  
+# Cross validation Classification
+def cv_classification_tf_idf(l_sentences, y, nb_splits):
+  """performs cross validation classification and outputs the average over all folds"""
+  
+  sk_fold = StratifiedKFold(n_splits=nb_splits)
+  tfidf_vectorizer = TfidfVectorizer()
+  cv_clf = MLPClassifier(max_iter=300, hidden_layer_sizes=(300,))
+
+  warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.model_selection._split")
+
+  pipeline = make_pipeline(tfidf_vectorizer, cv_clf)
+
+  if len(set(y)) > 1:
+    scores = cross_val_score(pipeline, l_sentences, y, cv=sk_fold, scoring='f1_micro')
+    return scores.mean()
+
+  else:
+    return 0
+  
+  # # Iterate through each fold
+  # for train_index, test_index in sk_fold.split(l_sentences, y):
+  #     X_train, X_test = [l_sentences[i] for i in train_index], [l_sentences[i] for i in test_index]
+  #     y_train, y_test = np.array(y)[train_index], np.array(y)[test_index]
+
+  #     X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+  #     X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+  #     if len(set(y)) > 1:
+  #       cv_classif = MLPClassifier(max_iter=300).fit(X_train_tfidf, y_train)
+
+  #       scores = cross_val_score(cv_classif, X, y, cv=sk_fold, scoring="f1_micro")
+  #       return scores.mean()
+
+  #     else:
+  #       return 0
 
 # Traditional Classification
 def traditional_classification(X_train,X_test,y_train, y_test):

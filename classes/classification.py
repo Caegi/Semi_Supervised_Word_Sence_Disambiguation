@@ -170,10 +170,6 @@ def compare_embeddings(df):
     X_glov, y_glov = get_x_y(data, "glov")
     glov_emb.append(cv_classification(X_glov, y_glov, 5))
 
-    # # classification with tf_idf
-    # X_tf_idf, y_tf_idf = get_x_y(data, "tf_idf")
-    # tf_idf_emb.append(cv_classification(X_tf_idf, y_tf_idf, 5))
-
   return (round(np.mean(np.asarray(fast_emb)),3), round(np.mean(np.asarray(w2v_emb)),3), round(np.mean(np.asarray(glov_emb)),3))
 
 

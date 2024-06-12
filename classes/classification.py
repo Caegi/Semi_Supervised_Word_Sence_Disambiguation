@@ -33,6 +33,9 @@ def get_x_y(data, embedding_type):
     X = np.asarray(data['ft_embeddings'].to_list()) 
   elif embedding_type == "w2v":
     X = np.asarray(data['w2v_embeddings'].to_list()) 
+  elif embedding_type == "tf_idf":
+    X = np.asarray(data['tf_idf_embeddings'].to_list())
+    X = np.vstack(X)
 
   y = data['sense_id'].to_list()
 
@@ -107,6 +110,7 @@ def compare_embeddings(df):
 
   fast_emb = []
   w2v_emb = []
+  tf_idf_emb = []
 
   list_of_verbs = df['lemma'].unique()
 
@@ -123,16 +127,20 @@ def compare_embeddings(df):
     X_w2v, y_w2v = get_x_y(data, "w2v")
     w2v_emb.append(cv_classification(X_w2v, y_w2v, 5))
 
-  return (fast_emb, w2v_emb)
+    # classification with tf_idf
+    X_tf_idf, y_tf_idf = get_x_y(data, "tf_idf")
+    tf_idf_emb.append(cv_classification(X_tf_idf, y_tf_idf, 5))
+
+  return (fast_emb, w2v_emb, tf_idf_emb)
 
 
 # computes the mean socre over all lemma
-def get_best(x1, x2, names):
+def get_best(x1, x2, x3, names):
   """prints the scores for better understanding"""
 
-  count = [round(np.mean(np.asarray(x1)), 3), round(np.mean(np.asarray(x2)),3)]
+  count = [round(np.mean(np.asarray(x1)), 3), round(np.mean(np.asarray(x2)),3), round(np.mean(np.asarray(x3)),3)]
   
-  print(f"Mean f-score over all lemma for: \n{names[0]}: {count[0]} \n{names[1]}: {count[1]}")
+  print(f"Mean f-score over all lemma for: \n{names[0]}: {count[0]} \n{names[1]}: {count[1]} \n{names[2]}: {count[2]}")
 
 
 # gives mean score over all lemma for decreasing number of examples (always around 10 test examples)

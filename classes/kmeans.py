@@ -150,7 +150,7 @@ def wsi_compare_embeddings(df):
     # Test glove vectors
     glov_kmeans = Kmeans(verb_df, k, "glove_embeddings")
     glov_kmeans.fit()
-    scores_kmeans_ft.append(glov_kmeans.evaluate())
+    scores_kmeans_glov.append(glov_kmeans.evaluate())
 
     # Constraint K-Means
     # Test fasttext vectors
@@ -178,6 +178,6 @@ def wsi_compare_embeddings(df):
   scores_kmeans_constr_glov = np.nan_to_num(np.asarray(scores_kmeans_constr_glov))
 
   print(f"K-Means:\nFastText: {round(np.mean(scores_kmeans_ft), 3)}\nWord2Vec: {round(np.mean(scores_kmeans_w2v), 3)}\nGloVe: {round(np.mean(scores_kmeans_glov), 3)}")
-  print(f"\nConstraint K-Means:\nFastText: {round(np.mean(np.asarray(scores_kmeans_constr_ft)))}\nWord2Vec: {round(np.mean(np.asarray(scores_kmeans_constr_w2v)))}\nGloVe: {round(np.mean(np.asarray(scores_kmeans_constr_glov)))}")
+  print(f"\nConstraint K-Means:\nFastText: {round(np.mean(scores_kmeans_constr_ft), 3)}\nWord2Vec: {round(np.mean(scores_kmeans_constr_w2v), 3)}\nGloVe: {round(np.mean(scores_kmeans_constr_glov), 3)}")
   
   

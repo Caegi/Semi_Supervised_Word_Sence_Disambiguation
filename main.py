@@ -39,8 +39,12 @@ if a.online_help().sentence:
         ft = fasttext.load_model('../cc.fr.300.bin')
         sentence_embedding = ft.get_sentence_vector(a.online_help().sentence).reshape(1, -1)
 
-        sense = df.loc[df["sense_id"] == model.predict(sentence_embedding)[0]].reset_index()
-        print(f"The word {a.online_help().lemma} has sense {sense['word_sense'][0]} in the provided sentence.")
+        if a.online_help().mode == "wsd":
+            sense = df.loc[df["sense_id"] == model.predict(sentence_embedding)[0]].reset_index()
+            print(f"The word {a.online_help().lemma} has sense {sense['word_sense'][0]} in the provided sentence.")
+
+        #else: insert here same for k-means! Default is k-means
+
 
     else: print("Please provide a sentence and a lemma to execute the code.")
 

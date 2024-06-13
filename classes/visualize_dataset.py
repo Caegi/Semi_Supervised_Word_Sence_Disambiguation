@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 #%%
-df = pd.read_json("../fse_data_w_embeddings.json")
+df = pd.read_json("src/fse_data_w_embeddings.json")
 #%%
 
 # count number of examples per lemma

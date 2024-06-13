@@ -7,7 +7,7 @@ import classes.arg_parser as a
 import pandas as pd
 import fasttext
 
-df = pd.read_json("fse_data_w_embeddings.json")
+df = pd.read_json("src/fse_data_w_embeddings.json")
 
 #save_trained_classif(df)
 

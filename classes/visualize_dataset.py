@@ -1,11 +1,10 @@
 #%%
 from classification import decrease_training_examples
-from data_preparation import get_data
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 #%%
-df = get_data()
+df = pd.read_json("../fse_data_w_embeddings.json")
 #%%
 
 # count number of examples per lemma

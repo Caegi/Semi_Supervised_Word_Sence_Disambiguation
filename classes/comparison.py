@@ -1,10 +1,6 @@
-from kmeans import Kmeans, KmeansConstraint
-from classification import cv_classification, get_x_y, cv_classification_tf_idf
+from classes.kmeans import Kmeans, KmeansConstraint
+from classes.classification import cv_classification, get_x_y, cv_classification_tf_idf
 import numpy as np
-
-
-# get dataset
-#df = pd.read_json("fse_data_w_embeddings.json")
 
 #comparison between WSI and WSD
 

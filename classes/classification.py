@@ -22,11 +22,15 @@ def get_x_y(data, embedding_type):
   return w2v or fasttext sentence embeddings and gold classes for given data
   """
 
+  # FastText
   if embedding_type == "ft":
     X = np.asarray(data['ft_embeddings'].to_list()) 
 
+  # Word2Vec
   elif embedding_type == "w2v":
     X = np.asarray(data['w2v_embeddings'].to_list()) 
+
+  # GloVe
   elif embedding_type == "glov":
     X = np.asarray(data['glove_embeddings'].to_list())
 
@@ -48,20 +52,20 @@ def cv_classification(X, y, nb_splits):
   warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.model_selection._split")
 
   if len(set(y)) > 1:
-    cv_classif = MLPClassifier(max_iter=300, hidden_layer_sizes=(300,))
+    cv_classif = MLPClassifier(max_iter=500, hidden_layer_sizes=(300,))
     scores = cross_val_score(cv_classif, X, y, cv=sk_fold, scoring="f1_micro")
     return scores.mean()
 
   else:
     return 0
   
-# Cross validation Classification
+# Cross validation Classification for tf idf
 def cv_classification_tf_idf(l_sentences, y, nb_splits):
   """performs cross validation classification and outputs the average over all folds"""
   
   sk_fold = StratifiedKFold(n_splits=nb_splits)
   tfidf_vectorizer = TfidfVectorizer()
-  cv_clf = MLPClassifier(max_iter=300, hidden_layer_sizes=(300,))
+  cv_clf = MLPClassifier(max_iter=500, hidden_layer_sizes=(300,))
 
   warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.model_selection._split")
 
@@ -96,7 +100,7 @@ def traditional_classification(X_train,X_test,y_train, y_test):
 
   # train classifier
   if len(set(y_train)) > 1:
-    classifier = LogisticRegression(solver = "liblinear").fit(X_train, y_train)
+    classifier = MLPClassifier(max_iter=500, hidden_layer_sizes=(300,)).fit(X_train, y_train)
     
     pred = classifier.predict(X_test)
     score = f1_score(y_test, pred, average="micro")
@@ -122,7 +126,8 @@ def compare_split_method(df):
   cv = []
   list_of_verbs = df['lemma'].unique()
 
-  for lemma in list_of_verbs:
+  for count,  lemma in enumerate(list_of_verbs):
+    print(f"Lemma {count+1} out of {len(list_of_verbs)}: {lemma}")
 
     # compute data frame with only one lemma
     data = df[(df['lemma'] == lemma)].reset_index()
@@ -132,10 +137,13 @@ def compare_split_method(df):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=4) # shuffles data by default before splitting
 
     # train classifiers with different methods
+    print("trad classif")
     trad_classif.append(traditional_classification(X_train, X_test, y_train, y_test))
+    print("Score:", trad_classif[-1])
+    print("cv classif")
     cv.append(cv_classification(X, y, 5))
+    print("Score:", cv[-1])
 
-  return (round(np.mean(np.asarray(trad_classif)),3), round(np.mean(np.asarray(cv)),3))
   return (round(np.mean(np.asarray(trad_classif)),3), round(np.mean(np.asarray(cv)),3))
 
 
@@ -158,27 +166,27 @@ def compare_embeddings(df):
     data = df[(df['lemma'] == lemma)].reset_index()
 
     # classification with fasttext
-    X_fast, y_fast = get_x_y(data, "ft")
-    fast_emb.append(cv_classification(X_fast, y_fast, 5))
+    X_fast, y = get_x_y(data, "ft")
+    fast_emb.append(cv_classification(X_fast, y, 5))
 
     # classification with word2vec
-    X_w2v, y_w2v = get_x_y(data, "w2v")
-    w2v_emb.append(cv_classification(X_w2v, y_w2v, 5))
+    X_w2v, y = get_x_y(data, "w2v")
+    w2v_emb.append(cv_classification(X_w2v, y, 5))
 
     # classification with glove
-    X_glov, y_glov = get_x_y(data, "glov")
-    glov_emb.append(cv_classification(X_glov, y_glov, 5))
+    X_glov, y = get_x_y(data, "glov")
+    glov_emb.append(cv_classification(X_glov, y, 5))
 
-  return (round(np.mean(np.asarray(fast_emb)),3), round(np.mean(np.asarray(w2v_emb)),3), round(np.mean(np.asarray(glov_emb)),3))
+    # tfidf
+    l_sentences = data["sentence"].to_list()
+    tf_idf_emb.append(cv_classification_tf_idf(l_sentences, y, 5))
+
+  return (round(np.mean(np.asarray(fast_emb)),3), round(np.mean(np.asarray(w2v_emb)),3), round(np.mean(np.asarray(glov_emb)),3), round(np.mean(np.asarray(tf_idf_emb)), 3))
 
 
 # computes the mean socre over all lemma
 def get_best(scores, names):
   """prints the scores for better understanding"""
-  
-  print(f"Mean f-score over all lemma for:")
-  for i in range(len(scores)):
-    print(f"{names[i]}: {scores[i]}")
   
   print(f"Mean f-score over all lemma for:")
   for i in range(len(scores)):
@@ -203,10 +211,6 @@ def decrease_training_examples(df):
       # compute data frame with only one lemma
       data = df[(df['lemma'] == lemma)].reset_index()
 
-      # make sure every class occurs at least 2 times
-      # so that every class occurs in our decreased train set
-      #data=data[data.groupby('sense_id').sense_id.transform(len)>1]
-      
       # get embeddings and gold labels
       X_total, y_total = get_x_y(data, "ft")
       
@@ -215,20 +219,11 @@ def decrease_training_examples(df):
       if should_be_nb < 50:
         X, X_left_out, y, y_left_out = train_test_split(X_total, y_total, test_size=t_size, random_state=5)
         
-        # try to get all classes in the decreasing k-fold
-        # sss=StratifiedShuffleSplit(n_splits=1, test_size=0.5, random_state=0)
-        # train_split = [train for train, test in sss.split(X_total, y_total)]
-        # X = X_total[train_split]
-        # train_split = train_split[0].tolist()
-        # y = [y_total[i] for i in train_split]
-
-
       else: 
         X = X_total
         y = y_total
 
       real_nb = X.shape[0]
-      #print(f"Number of senses in total: {len(set(y_total))}\nNumber of senses in smaller set: {len(set(y))}")
 
       # exception for case when split is smaller than 2
       # always size test set = 10 except for 15 and 10 examples (test set = 7 and 5 examples)

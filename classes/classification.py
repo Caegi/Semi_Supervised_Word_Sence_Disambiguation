@@ -143,7 +143,7 @@ def compare_split_method(df):
     print("Score:", trad_classif[-1])
     print("cv classif")
     cv.append(cv_classification(X, y, 5))
-    print("Score:", cv[-1])
+    print("Score:", cv[-1], "\n")
 
   return (round(np.mean(np.asarray(trad_classif)),3), round(np.mean(np.asarray(cv)),3))
 

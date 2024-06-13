@@ -15,7 +15,9 @@ def compare(df):
   scores_classif_tfidf = []
 
   # loop through the verbs, we classify and cluster for each verb
-  for verb in list_of_verbs:
+  for count,  verb in enumerate(list_of_verbs):
+    print(f"Lemma {count+1} out of {len(list_of_verbs)}: {verb}")
+
     verb_df = df[df['lemma'] == verb].reset_index()
 
     # number of clusters
@@ -32,14 +34,18 @@ def compare(df):
     # evaluate clustering
     scores_kmeans.append(my_kmeans.evaluate()) # type: ignore
     scores_kmeans_constr.append(my_kmeans_constraint.evaluate())
+    print("K-means:", scores_kmeans[-1])
+    print("Constrained k-means:", scores_kmeans_constr[-1])
 
     # evaluate classification
     X, y = get_x_y(verb_df, "ft")
     scores_classif.append(cv_classification(X, y, 5))
+    print("Classification:", scores_classif[-1])
 
     # evaluate tf_idf
     l_sentences = verb_df["sentence"].to_list()
     scores_classif_tfidf.append(cv_classification_tf_idf(l_sentences, y, 5))
+    print("TF-IDF:", scores_classif_tfidf[-1], "\n")
 
 
   print(f"mean score k-means: {np.mean(np.asarray(scores_kmeans))}")

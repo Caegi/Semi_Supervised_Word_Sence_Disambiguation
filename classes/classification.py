@@ -13,6 +13,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import make_pipeline
+from joblib import dump
 
 """get X and y for classification"""
 
@@ -160,7 +161,8 @@ def compare_embeddings(df):
 
   list_of_verbs = df['lemma'].unique()
 
-  for lemma in list_of_verbs:
+  for count,  lemma in enumerate(list_of_verbs):
+    print(f"Lemma {count+1} out of {len(list_of_verbs)}: {lemma}")
 
     # compute data frame with only one lemma
     data = df[(df['lemma'] == lemma)].reset_index()
@@ -168,18 +170,22 @@ def compare_embeddings(df):
     # classification with fasttext
     X_fast, y = get_x_y(data, "ft")
     fast_emb.append(cv_classification(X_fast, y, 5))
+    print("Fasttext classification:", fast_emb[-1])
 
     # classification with word2vec
     X_w2v, y = get_x_y(data, "w2v")
     w2v_emb.append(cv_classification(X_w2v, y, 5))
+    print("Word2Vec classification:", w2v_emb[-1])
 
     # classification with glove
     X_glov, y = get_x_y(data, "glov")
     glov_emb.append(cv_classification(X_glov, y, 5))
+    print("GloVe classification:", glov_emb[-1])
 
     # tfidf
     l_sentences = data["sentence"].to_list()
     tf_idf_emb.append(cv_classification_tf_idf(l_sentences, y, 5))
+    print("TF-IDF classification:", tf_idf_emb[-1], "\n")
 
   return (round(np.mean(np.asarray(fast_emb)),3), round(np.mean(np.asarray(w2v_emb)),3), round(np.mean(np.asarray(glov_emb)),3), round(np.mean(np.asarray(tf_idf_emb)), 3))
 
@@ -244,3 +250,23 @@ def decrease_training_examples(df):
     
   return scores
 
+'''Save trained classifiers as joblib'''
+
+def save_trained_classif(df): 
+  '''Saves the models to a joblib file'''
+  list_of_verbs = df['lemma'].unique()
+
+  for count,  lemma in enumerate(list_of_verbs):
+    print(f"Lemma {count+1} out of {len(list_of_verbs)}: {lemma}")
+
+    # compute data frame with only one lemma
+    data = df[(df['lemma'] == lemma)].reset_index()
+
+    X, y = get_x_y(data, "ft")
+    classifier = MLPClassifier(max_iter=500, hidden_layer_sizes=(300,))
+    print("Train classifier")
+    classifier.fit(X, y)
+
+    print("Save model\n")
+    file_name = f"../trained_models/{lemma}.joblib"
+    dump(classifier, file_name)

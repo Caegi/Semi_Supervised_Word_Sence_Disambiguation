@@ -16,7 +16,7 @@ df = pd.read_csv('./fse_data.csv')
 
 # load static embeddings
 w2v = KeyedVectors.load_word2vec_format("../frWac_non_lem_no_postag_no_phrase_200_cbow_cut100.bin", binary=True, unicode_errors="ignore")
-# glove = KeyedVectors.load_word2vec_format('../vectors_glov_w2v.txt', binary=False)
+glove = KeyedVectors.load_word2vec_format('../vectors_glov_w2v.txt', binary=False)
 ft = fasttext.load_model('../cc.fr.300.bin')
 
 senses = set(df.word_sense.tolist())

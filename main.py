@@ -31,19 +31,24 @@ elif a.online_help().compare:
 
 if a.online_help().sentence:
     if a.online_help().lemma:
-        # get file to load the model
-        file_path = f"../trained_models/{a.online_help().lemma}.joblib"
-        model = load(file_path)
-
+        
         # get sentence embedding with fasttext vector
         ft = fasttext.load_model('../cc.fr.300.bin')
         sentence_embedding = ft.get_sentence_vector(a.online_help().sentence).reshape(1, -1)
 
+        # for WSD Classification
         if a.online_help().mode == "wsd":
-            sense = df.loc[df["sense_id"] == model.predict(sentence_embedding)[0]].reset_index()
+            # get file to load the model
+            file_path = f"../trained_models/{a.online_help().lemma}.joblib"
+            print(file_path)
+            model = load(file_path)
+
+            # model predicts sense-id, get actual sense of the word
+            sense = df.loc[(df["sense_id"] == model.predict(sentence_embedding)[0]) & (df['lemma'] == a.online_help().lemma)].reset_index()
             print(f"The word {a.online_help().lemma} has sense {sense['word_sense'][0]} in the provided sentence.")
 
-        #else: insert here same for k-means! Default is k-means
+        else: 
+            print("You selected K-means.")
 
 
     else: print("Please provide a sentence and a lemma to execute the code.")

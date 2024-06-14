@@ -6,7 +6,7 @@ What is the project about?
 Every functionality can be used with a command in the terminal. Before you start, make sure to add two files to the parent directory of our project: 
 
 1. The file containing FastText embeddings: It is called cc.fr.300.bin and can be downloaded <a href="https://fasttext.cc/docs/en/crawl-vectors.html">here</a>. Just search for French and click on bin. 
-2. The folder with the trained models: It is named trained_models and is included in the zip file we handed in. 
+2. The two folders with the trained models and the trained clusters: The folder containing the classification models is named trained_models and that for the clustering models is named trained_kmeans. Both are included in the zip file we handed in. 
 
 With this done, everything else you need to know are the commands for the terminal. Here is an overview over all the options: 
 
@@ -23,4 +23,4 @@ The next three options have to be used together. With them, you can provide the 
 |--------|--------|
 |--sentence, -s| Provide a the sentence to be evaluated between quotes|
 |--lemma, -l| Provide the lemma that should be looked at in the sentence. This is used to select the right pretrained model|
-|--mode, -m| Provide either "wsd" or "wsi" depending on which method you want to use to predict the sense|
+|--mode, -m| Provide either "wsd" or "wsi" depending on which method you want to use to predict the sense. The default mode is WSI.|

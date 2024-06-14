@@ -3,6 +3,7 @@ import numpy as np
 import spacy
 from sklearn.metrics import f1_score
 from sklearn.metrics.cluster import contingency_matrix
+from joblib import dump
 
 class Kmeans:
 
@@ -105,7 +106,6 @@ class Kmeans:
 
     return score
 
-    
 
 class KmeansConstraint(Kmeans):
   
@@ -181,3 +181,24 @@ def wsi_compare_embeddings(df):
   print(f"\nConstraint K-Means:\nFastText: {round(np.mean(scores_kmeans_constr_ft), 3)}\nWord2Vec: {round(np.mean(scores_kmeans_constr_w2v), 3)}\nGloVe: {round(np.mean(scores_kmeans_constr_glov), 3)}")
   
   
+def save_trained_kmeans(df):
+  '''Saves the models to a joblib file'''
+  list_of_verbs = df['lemma'].unique()
+
+  for count,  lemma in enumerate(list_of_verbs):
+    print(f"Lemma {count+1} out of {len(list_of_verbs)}: {lemma}")
+
+    # compute data frame with only one lemma
+    data = df[(df['lemma'] == lemma)].reset_index()
+
+    # number of clusters
+    k = len(data['word_sense'].unique())
+
+    # instantiate KMeans Clustering
+    print("Fit K-Means")
+    my_kmeans = Kmeans(data, k, "ft_embeddings")
+    my_kmeans.fit()
+
+    print("Save model\n")
+    file_name = f"../trained_kmeans/{lemma}.joblib"
+    dump(my_kmeans, file_name)

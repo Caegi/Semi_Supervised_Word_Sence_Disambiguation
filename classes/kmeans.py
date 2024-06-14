@@ -109,13 +109,38 @@ class Kmeans:
 
 class KmeansConstraint(Kmeans):
   
-  # Override
-  # Method to initialize centroids with first example of each unique word sense in the verb dataframe
-  def _init_centroids(self):
-    prototypes = self.df.groupby('word_sense').apply(lambda x: x.iloc[0, x.columns != 'word_sense'])
-    centroids_array = np.vstack(prototypes[self.embeddings].values) # type: ignore
-    return centroids_array
+    # Override
+    # Method to initialize centroids with the first example of each unique word sense in the DataFrame
+    def _init_centroids(self):
 
+        n = 6
+        all_mean_embeddings = []
+        unique_senses = self.df['word_sense'].unique()
+
+        for sense in unique_senses:
+
+            mean_embedding = None  # Initialize mean_embedding
+
+            indices = self.df['word_sense'] == sense
+            sense_df = self.df[indices]  # DataFrame that contains all the examples of a unique sense
+
+            if len(sense_df) >= n:
+                embeddings = np.array(sense_df.head(n)[self.embeddings].tolist())
+                mean_embedding = embeddings.mean(axis=0)
+
+            elif 1 < len(sense_df) < n:
+                embeddings = np.array(sense_df[self.embeddings].tolist())
+                mean_embedding = embeddings.mean(axis=0)
+
+            else:
+                embedding = sense_df[self.embeddings].values[0]
+                mean_embedding = np.array(embedding)
+
+            all_mean_embeddings.append(mean_embedding)
+
+        centroids = np.vstack(all_mean_embeddings)
+
+        return centroids
 
 def wsi_compare_embeddings(df):
     # List of verbs in the Dataset: 66 verbs

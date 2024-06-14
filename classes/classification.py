@@ -209,8 +209,9 @@ def decrease_training_examples(df):
     scores_per_lemma = []
     list_of_verbs = df['lemma'].unique()
 
-    for lemma in list_of_verbs:
-      print(f"Lemma: {lemma} with {(1-t_size) * 100}% of examples")
+    for count, lemma in enumerate(list_of_verbs):
+
+      print(f"Lemma {count+1} out of 66: {lemma} with {(1-t_size) * 100}% of examples")
 
       # compute data frame with only one lemma
       data = df[(df['lemma'] == lemma)].reset_index()
@@ -240,9 +241,11 @@ def decrease_training_examples(df):
       
 
       scores_per_lemma.append(cv_classification(X, y, split))
+      print(f"Score for {lemma}: {scores_per_lemma[-1]}\n")
     
     scores_np = np.nan_to_num(np.asarray(scores_per_lemma))    
     scores.append(round(np.mean(scores_np),3))
+    print(f"Scores for {(1-t_size) * 100}% of examples: {scores[-1]}\n")
     t_size += 0.1
     should_be_nb -= 5
     

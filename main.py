@@ -1,4 +1,4 @@
-from classes.classification import get_best, compare_embeddings, compare_split_method
+from classes.classification import get_best, compare_embeddings, compare_split_method, decrease_training_examples
 #from classes.classification import save_trained_classif
 from joblib import load
 from classes.kmeans import wsi_compare_embeddings
@@ -100,3 +100,6 @@ elif a.online_help().verbs:
 
 elif a.online_help().lemma:
     print("Please provide a sentence with your lemma.")
+
+elif a.online_help().decrease:
+    decrease_training_examples(df)

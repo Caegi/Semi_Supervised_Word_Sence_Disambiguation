@@ -9,10 +9,12 @@ def online_help():
     parser.add_argument("-d", "--wsd", required=False, action = "store_true", help="Execute only WSD tests")
     parser.add_argument("-i", "--wsi", required=False, action = "store_true", help="Execute only WSI tests")
     parser.add_argument("-c", "--compare", required=False, action = "store_true", help="Execute the comparison")
+    parser.add_argument("-v", "--verbs", required=False, action="store_true", help="Shows all available verbs for the test sentences.")
+    parser.add_argument("-dc", "--decrease", required=False, action="store_true", help="Shows the result of decreasing training exmples for classification.")
+    parser.add_argument("-ic", "--increase", required=False, action="store_true", help="Shows results of increasing the number of examples to initialize k-means clustering.")
     parser.add_argument("-s", "--sentence", type=str, help="Sentence you want to analyze. Can only be used with lemma")
     parser.add_argument("-l", "--lemma", type=str, help="Word in the sentence you want to analyze. Can only be used with sentence")
     parser.add_argument("-m", "--mode", type=str, help="indicate which method to use to analyze the sentence. Available are: 'wsd' and 'wsi'.")
-    parser.add_argument("-v", "--verbs", required=False, action="store_true", help="Shows all available verbs for the test sentences.")
 
     args = parser.parse_args()
 

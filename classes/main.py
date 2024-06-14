@@ -1,10 +1,10 @@
-from classes.classification import get_best, compare_embeddings, compare_split_method, decrease_training_examples
+from classification import get_best, compare_embeddings, compare_split_method, decrease_training_examples
 #from classes.classification import save_trained_classif
 from joblib import load
-from classes.kmeans import wsi_compare_embeddings
-#from classes.kmeans import save_trained_kmeans
-from classes.comparison import compare
-import classes.arg_parser as a
+from kmeans import wsi_compare_embeddings
+#from kmeans import save_trained_kmeans
+from comparison import compare, print_comparison_kmeans_clf
+import arg_parser as a
 import pandas as pd
 import fasttext
 import numpy as np
@@ -39,11 +39,16 @@ if a.online_help().wsd:
 
 # show tests on WSI
 elif a.online_help().wsi:
-    wsi_compare_embeddings(df)
+    wsi_compare_embeddings(df, 0)
 
 # show k-means, constraint k-means, classification and classification with TF-IDF
 elif a.online_help().compare:
-    compare(df)
+    compare(df, 0)
+
+# compare the constrained kmeans and the classifier to see how many examples
+#  should be added as constraint for the constrained kmeans to get a better score
+elif a.online_help().compare_km_clf:
+    print_comparison_kmeans_clf(df)
 
 # get word sense for a new sentence 
 elif a.online_help().sentence:

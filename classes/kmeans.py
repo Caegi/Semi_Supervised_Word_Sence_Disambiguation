@@ -108,12 +108,15 @@ class Kmeans:
 
 
 class KmeansConstraint(Kmeans):
-  
+    def __init__(self, df: pd.DataFrame, k: int, embeddings, n: int):
+        super().__init__(df, k, embeddings)
+        self.n = n
+
     # Override
     # Method to initialize centroids with the first example of each unique word sense in the DataFrame
     def _init_centroids(self):
 
-        n = 6
+        n = self.n + 1 # to avoid index errors
         all_mean_embeddings = []
         unique_senses = self.df['word_sense'].unique()
 
@@ -125,16 +128,16 @@ class KmeansConstraint(Kmeans):
             sense_df = self.df[indices]  # DataFrame that contains all the examples of a unique sense
 
             if len(sense_df) >= n:
-                embeddings = np.array(sense_df.head(n)[self.embeddings].tolist())
-                mean_embedding = embeddings.mean(axis=0)
+              embeddings = np.array(sense_df.head(n)[self.embeddings].tolist())
+              mean_embedding = embeddings.mean(axis=0)
 
             elif 1 < len(sense_df) < n:
-                embeddings = np.array(sense_df[self.embeddings].tolist())
-                mean_embedding = embeddings.mean(axis=0)
+              embeddings = np.array(sense_df[self.embeddings].tolist())
+              mean_embedding = embeddings.mean(axis=0)
 
             else:
-                embedding = sense_df[self.embeddings].values[0]
-                mean_embedding = np.array(embedding)
+              embedding = sense_df[self.embeddings].values[0]
+              mean_embedding = np.array(embedding)
 
             all_mean_embeddings.append(mean_embedding)
 
@@ -142,7 +145,7 @@ class KmeansConstraint(Kmeans):
 
         return centroids
 
-def wsi_compare_embeddings(df):
+def wsi_compare_embeddings(df, nb_ex4constraint):
     # List of verbs in the Dataset: 66 verbs
   list_of_verbs = df['lemma'].unique()
 
@@ -179,17 +182,17 @@ def wsi_compare_embeddings(df):
 
     # Constraint K-Means
     # Test fasttext vectors
-    ft_kmeans_constraint = KmeansConstraint(verb_df, k, "ft_embeddings")
+    ft_kmeans_constraint = KmeansConstraint(verb_df, k, "ft_embeddings", nb_ex4constraint)
     ft_kmeans_constraint.fit()
     scores_kmeans_constr_ft.append(ft_kmeans_constraint.evaluate())
 
     # Test word2vec vectors
-    w2v_kmeans_constraint = KmeansConstraint(verb_df, k, "w2v_embeddings")
+    w2v_kmeans_constraint = KmeansConstraint(verb_df, k, "w2v_embeddings", nb_ex4constraint)
     w2v_kmeans_constraint.fit()
     scores_kmeans_constr_w2v.append(w2v_kmeans_constraint.evaluate())
 
     # Test glove vectors
-    glov_kmeans_constraint = KmeansConstraint(verb_df, k, "glove_embeddings")
+    glov_kmeans_constraint = KmeansConstraint(verb_df, k, "glove_embeddings", nb_ex4constraint)
     glov_kmeans_constraint.fit()
     scores_kmeans_constr_glov.append(glov_kmeans_constraint.evaluate())
 

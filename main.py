@@ -1,7 +1,7 @@
 from classes.classification import get_best, compare_embeddings, compare_split_method
 #from classes.classification import save_trained_classif
 from joblib import load
-from classes.kmeans import wsi_compare_embeddings, Kmeans
+from classes.kmeans import wsi_compare_embeddings
 #from classes.kmeans import save_trained_kmeans
 from classes.comparison import compare
 import classes.arg_parser as a
@@ -14,10 +14,6 @@ df = pd.read_json("src/fse_data_w_embeddings.json")
 
 #save_trained_classif(df)
 #save_trained_kmeans(df)
-
-# define cosine similaritiy
-def cosine_similarity(a, b):
-    return np.dot(a, b)/(norm(a)* norm(b))
 
 def same_length(verb):
     
@@ -72,7 +68,7 @@ elif a.online_help().sentence:
 
         # for WSI Clustering
         else: 
-            print("You cose to get the word sense with our WSI model.")
+            print("You chose to get the word sense with our WSI model.")
 
             # get file to load pretrained k-means
             file_path = f"../trained_kmeans/{a.online_help().lemma}.joblib"
@@ -80,9 +76,14 @@ elif a.online_help().sentence:
 
             # predict cluster of the sentence
             centroids = model.get_centroids()
-            dist = [cosine_similarity(c, sentence_embedding) for c in centroids]
 
-            print(f"The word {a.online_help().lemma} has the sense of cluster {np.argmin(dist)} in the provided sentence")
+            # compute cosine similarity
+            normalized_centroids = centroids / norm(centroids)
+            normalized_embeddings = sentence_embedding / norm(sentence_embedding)
+
+            cosine = np.matmul(normalized_centroids, normalized_embeddings.T)
+
+            print(f"The word {a.online_help().lemma} has the sense of cluster {np.argmin(cosine)} in the provided sentence")
 
 
     else: print("Please provide a sentence and a lemma to execute the code.")
@@ -97,16 +98,5 @@ elif a.online_help().verbs:
               f"{same_length(list_of_verbs[i+2])}\t{same_length(list_of_verbs[i+3])}")
 
 
-# elif a.online_help().lemma:
-#     if a.online_help().sentence:
-
-#       # get file to load the model
-        # file_path = f"../trained_models/{a.online_help().lemma}.joblib"
-        # model = load(file_path)
-
-        # # get sentence embedding with fasttext vector
-        # ft = fasttext.load_model('../cc.fr.300.bin')
-        # sentence_embedding = ft.get_sentence_vector(a.online_help().sentence).reshape(1, -1)
-        # print(f"The word {a.online_help.lemma} has sense number {model.predict(sentence_embedding)} in the provided sentence.")
-
-#     else: print("Please provide a sentence and a lemma to execute the code.")
+elif a.online_help().lemma:
+    print("Please provide a sentence with your lemma.")

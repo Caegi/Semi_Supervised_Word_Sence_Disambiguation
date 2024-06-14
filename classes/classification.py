@@ -3,13 +3,11 @@
 """Import"""
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score
 import warnings
 from sklearn.exceptions import UndefinedMetricWarning
-from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import make_pipeline

@@ -16,6 +16,7 @@ help, -h |Display the online help we provided|
 |--wsi, -i| Show our clustering results for the different embeddings|
 |--wsd, -d|Show our classification results for the different embeddings and the split method. WARNING: This takes around 1h to execute!|
 |--compare, -c|Show the clustering results and the classification results to compare them. WARNING: This takes around 10 minutes to execute!|
+|--verbs, -v|Show all availble verbs, that we trained our models on. There are 66 verbs in total.
 
 The next three options have to be used together. With them, you can provide the model with a sentence and a lemma and it predicts the lemma's sense used in the sentence: 
 

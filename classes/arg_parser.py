@@ -12,6 +12,7 @@ def online_help():
     parser.add_argument("-s", "--sentence", type=str, help="Sentence you want to analyze. Can only be used with lemma")
     parser.add_argument("-l", "--lemma", type=str, help="Word in the sentence you want to analyze. Can only be used with sentence")
     parser.add_argument("-m", "--mode", type=str, help="indicate which method to use to analyze the sentence. Available are: 'wsd' and 'wsi'.")
+    parser.add_argument("-v", "--verbs", required=False, action="store_true", help="Shows all available verbs for the test sentences.")
 
     args = parser.parse_args()
 

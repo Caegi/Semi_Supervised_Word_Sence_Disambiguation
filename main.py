@@ -15,6 +15,14 @@ df = pd.read_json("src/fse_data_w_embeddings.json")
 #save_trained_classif(df)
 #save_trained_kmeans(df)
 
+# define cosine similaritiy
+def cosine_similarity(a, b):
+    return np.dot(a, b)/(norm(a)* norm(b))
+
+def same_length(verb):
+    
+    spaces = [" "] * (10 - len(verb))
+    return verb + "".join(spaces)
 
 # show tests on WSD
 if a.online_help().wsd:
@@ -66,10 +74,6 @@ elif a.online_help().sentence:
         else: 
             print("You cose to get the word sense with our WSI model.")
 
-            # define cosine similaritiy
-            def cosine_similarity(a, b):
-                return np.dot(a, b)/(norm(a)* norm(b))
-
             # get file to load pretrained k-means
             file_path = f"../trained_kmeans/{a.online_help().lemma}.joblib"
             model = load(file_path)
@@ -82,6 +86,16 @@ elif a.online_help().sentence:
 
 
     else: print("Please provide a sentence and a lemma to execute the code.")
+
+elif a.online_help().verbs:
+    
+    list_of_verbs = sorted(df['lemma'].unique())
+
+    for i in range(0, len(list_of_verbs)-3, 4):
+
+        print(f"{same_length(list_of_verbs[i])}\t{same_length(list_of_verbs[i+1])}\t", \
+              f"{same_length(list_of_verbs[i+2])}\t{same_length(list_of_verbs[i+3])}")
+
 
 # elif a.online_help().lemma:
 #     if a.online_help().sentence:

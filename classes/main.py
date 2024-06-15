@@ -39,11 +39,13 @@ if a.online_help().wsd:
 
 # show tests on WSI
 elif a.online_help().wsi:
-    wsi_compare_embeddings(df, 0)
+    exs_2add_as_constraint = 2
+    wsi_compare_embeddings(df, exs_2add_as_constraint)
 
 # show k-means, constraint k-means, classification and classification with TF-IDF
 elif a.online_help().compare:
-    compare(df, 0)
+    exs_2add_as_constraint = 2
+    compare(df, exs_2add_as_constraint)
 
 # compare the constrained kmeans and the classifier to see how many examples
 #  should be added as constraint for the constrained kmeans to get a better score

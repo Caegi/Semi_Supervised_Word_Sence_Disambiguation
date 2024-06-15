@@ -10,7 +10,7 @@ class Kmeans:
   global nlp
   nlp = spacy.load("fr_core_news_sm")
 
-  def __init__(self, df: pd.DataFrame, k: int, embeddings):
+  def __init__(self, df: pd.DataFrame, k: int, emb_src: str):
     """
     Initialize KMeansClustering object.
     Args:
@@ -20,19 +20,19 @@ class Kmeans:
     self.df = df.copy()  # Make a copy to avoid modifying the original DataFrame
     self.k = k
     self.centroids = None
-    self.embeddings = embeddings
+    self.emb_src = emb_src
 
   def _init_centroids(self):
     random_indices = np.random.choice(range(len(self.df)), size=self.k, replace=False)
     centroids_df = self.df.iloc[random_indices]
-    centroids_array = np.vstack(centroids_df[self.embeddings].values)
+    centroids_array = np.vstack(centroids_df[self.emb_src].values)
     return centroids_array
 
   # Method to calculate new centroids
   def _get_new_centroids(self, cs):
     new_centroids = []
     for c in cs:
-      vectors = np.vstack(self.df.loc[self.df['cluster'] == c, self.embeddings].values) # type: ignore
+      vectors = np.vstack(self.df.loc[self.df['cluster'] == c, self.emb_src].values) # type: ignore
       centroid = np.mean(vectors, axis=0)
       new_centroids.append(centroid)
     return np.array(new_centroids)
@@ -57,7 +57,7 @@ class Kmeans:
     self.df.loc[:, 'cluster'] = 0
     # Excluding last column which is cluster label
     # self.df'embedding'] = self.df['sentence'].apply(lambda x: nlp(x).vector) # type: ignore
-    embeddings_array = np.asarray(self.df[self.embeddings].to_list())
+    embeddings_array = np.asarray(self.df[self.emb_src].to_list())
     self.centroids = self._init_centroids()
     is_changed = True
 
@@ -108,15 +108,15 @@ class Kmeans:
 
 
 class KmeansConstraint(Kmeans):
-    def __init__(self, df: pd.DataFrame, k: int, embeddings, n: int):
-        super().__init__(df, k, embeddings)
-        self.n = n
+    def __init__(self, df: pd.DataFrame, k: int, emb_src: str, nb_ex4constraint: int):
+        super().__init__(df, k, emb_src)
+        self.nb_ex4constraint = nb_ex4constraint
 
     # Override
     # Method to initialize centroids with the first example of each unique word sense in the DataFrame
     def _init_centroids(self):
 
-        n = self.n + 1 # to avoid index errors
+        nb_ex4constraint = self.nb_ex4constraint + 1 # to avoid index errors
         all_mean_embeddings = []
         unique_senses = self.df['word_sense'].unique()
 
@@ -127,16 +127,16 @@ class KmeansConstraint(Kmeans):
             indices = self.df['word_sense'] == sense
             sense_df = self.df[indices]  # DataFrame that contains all the examples of a unique sense
 
-            if len(sense_df) >= n:
-              embeddings = np.array(sense_df.head(n)[self.embeddings].tolist())
+            if len(sense_df) >= nb_ex4constraint:
+              embeddings = np.array(sense_df.head(nb_ex4constraint)[self.emb_src].tolist())
               mean_embedding = embeddings.mean(axis=0)
 
-            elif 1 < len(sense_df) < n:
-              embeddings = np.array(sense_df[self.embeddings].tolist())
+            elif 1 < len(sense_df) < nb_ex4constraint:
+              embeddings = np.array(sense_df[self.emb_src].tolist())
               mean_embedding = embeddings.mean(axis=0)
 
             else:
-              embedding = sense_df[self.embeddings].values[0]
+              embedding = sense_df[self.emb_src].values[0]
               mean_embedding = np.array(embedding)
 
             all_mean_embeddings.append(mean_embedding)

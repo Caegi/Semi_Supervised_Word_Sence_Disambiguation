@@ -1,5 +1,5 @@
-from kmeans import Kmeans, KmeansConstraint
-from classification import cv_classification, get_x_y, cv_classification_tf_idf
+from src.kmeans import Kmeans, KmeansConstraint
+from src.classification import cv_classification, get_x_y, cv_classification_tf_idf
 import numpy as np
 
 #comparison between WSI and WSD

@@ -1,16 +1,18 @@
-from classification import get_best, compare_embeddings, compare_split_method, decrease_training_examples
+from src.classification import get_best, compare_embeddings, compare_split_method, decrease_training_examples
 #from classes.classification import save_trained_classif
 from joblib import load
-from kmeans import wsi_compare_embeddings
-#from kmeans import save_trained_kmeans
-from comparison import compare, print_comparison_kmeans_clf
-import arg_parser as a
+from src.kmeans import wsi_compare_embeddings
+#from src.kmeans import save_trained_kmeans
+from src.comparison import compare, print_comparison_kmeans_clf
+import src.arg_parser as a
 import pandas as pd
 import fasttext
 import numpy as np
 from numpy.linalg import norm
 
-df = pd.read_json("src/fse_data_w_embeddings.json")
+# load data
+df = pd.read_json("data/fse_data_w_embeddings.json")
+
 
 #save_trained_classif(df)
 #save_trained_kmeans(df)
@@ -44,13 +46,17 @@ elif a.online_help().wsi:
 
 # show k-means, constraint k-means, classification and classification with TF-IDF
 elif a.online_help().compare:
+    print("WARNING: This will take around 1h to run.")
     exs_2add_as_constraint = 2
     compare(df, exs_2add_as_constraint)
 
 # compare the constrained kmeans and the classifier to see how many examples
 #  should be added as constraint for the constrained kmeans to get a better score
-elif a.online_help().compare_km_clf:
+elif a.online_help().increase:
     print_comparison_kmeans_clf(df)
+
+elif a.online_help().decrease:
+    decrease_training_examples(df)
 
 # get word sense for a new sentence 
 elif a.online_help().sentence:
@@ -107,6 +113,3 @@ elif a.online_help().verbs:
 
 elif a.online_help().lemma:
     print("Please provide a sentence with your lemma.")
-
-elif a.online_help().decrease:
-    decrease_training_examples(df)

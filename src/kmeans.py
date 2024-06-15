@@ -7,8 +7,8 @@ from joblib import dump
 
 class Kmeans:
 
-  global nlp
-  nlp = spacy.load("fr_core_news_sm")
+  #global nlp
+  #nlp = spacy.load("fr_core_news_sm")
 
   def __init__(self, df: pd.DataFrame, k: int, emb_src: str):
     """
@@ -224,7 +224,7 @@ def save_trained_kmeans(df):
 
     # instantiate KMeans Clustering
     print("Fit K-Means")
-    my_kmeans = Kmeans(data, k, "ft_embeddings")
+    my_kmeans = KmeansConstraint(data, k, "ft_embeddings", 9)
     my_kmeans.fit()
 
     print("Save model\n")

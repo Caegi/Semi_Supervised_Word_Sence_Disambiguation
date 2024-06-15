@@ -65,6 +65,7 @@ elif a.online_help().sentence:
         # get sentence embedding with fasttext vector
         print(f"Your input sentence is: {a.online_help().sentence}")
         print("Your sentence is being processed...")
+        fasttext.FastText.eprint = lambda x: None # supress fasttext warning
         ft = fasttext.load_model('../cc.fr.300.bin')
         sentence_embedding = ft.get_sentence_vector(a.online_help().sentence)
 

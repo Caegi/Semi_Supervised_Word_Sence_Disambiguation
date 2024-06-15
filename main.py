@@ -53,7 +53,8 @@ elif a.online_help().compare:
 # compare the constrained kmeans and the classifier to see how many examples
 #  should be added as constraint for the constrained kmeans to get a better score
 elif a.online_help().increase:
-    print_comparison_kmeans_clf(df)
+    max_ex4constraint = 15 
+    print_comparison_kmeans_clf(df, max_ex4constraint)
 
 elif a.online_help().decrease:
     decrease_training_examples(df)

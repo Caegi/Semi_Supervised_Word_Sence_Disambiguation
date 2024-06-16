@@ -42,13 +42,19 @@ def get_x_y(data, embedding_type):
 # Cross validation Classification
 def cv_classification(X, y, nb_splits):
   """performs cross validation classification and outputs the average over all folds
-  
+  X: np.array with dimensions nb_examples x embedding_size (300 for ft and glove and 200 for w2v)
   y: list[int]
+  nb_splits: int
   """
   
+  # initialize cross validation
   sk_fold = StratifiedKFold(n_splits=nb_splits)
 
   warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.model_selection._split")
+
+  # make sure that the lemma has more than one word sense
+  # if it is the case: train the classifier
+  # otherwise: return 0
 
   if len(set(y)) > 1:
     cv_classif = MLPClassifier(max_iter=500, hidden_layer_sizes=(300,))
@@ -62,6 +68,7 @@ def cv_classification(X, y, nb_splits):
 def cv_classification_tf_idf(l_sentences, y, nb_splits):
   """performs cross validation classification and outputs the average over all folds"""
   
+  # initialize cross validation, tf-idf and the classifier
   sk_fold = StratifiedKFold(n_splits=nb_splits)
   tfidf_vectorizer = TfidfVectorizer()
   cv_clf = MLPClassifier(max_iter=500, hidden_layer_sizes=(300,))
@@ -70,6 +77,9 @@ def cv_classification_tf_idf(l_sentences, y, nb_splits):
 
   pipeline = make_pipeline(tfidf_vectorizer, cv_clf)
 
+  # make sure that the lemma has more than one word sense
+  # if it is the case: train the classifier
+  # otherwise: return 0
   if len(set(y)) > 1:
     scores = cross_val_score(pipeline, l_sentences, y, cv=sk_fold, scoring='f1_micro')
     return scores.mean()
@@ -77,22 +87,6 @@ def cv_classification_tf_idf(l_sentences, y, nb_splits):
   else:
     return 0
   
-  # # Iterate through each fold
-  # for train_index, test_index in sk_fold.split(l_sentences, y):
-  #     X_train, X_test = [l_sentences[i] for i in train_index], [l_sentences[i] for i in test_index]
-  #     y_train, y_test = np.array(y)[train_index], np.array(y)[test_index]
-
-  #     X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
-  #     X_test_tfidf = tfidf_vectorizer.transform(X_test)
-
-  #     if len(set(y)) > 1:
-  #       cv_classif = MLPClassifier(max_iter=300).fit(X_train_tfidf, y_train)
-
-  #       scores = cross_val_score(cv_classif, X, y, cv=sk_fold, scoring="f1_micro")
-  #       return scores.mean()
-
-  #     else:
-  #       return 0
 
 # Traditional Classification
 def traditional_classification(X_train,X_test,y_train, y_test):
@@ -135,10 +129,12 @@ def compare_split_method(df):
     X, y = get_x_y(data, "ft")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=4) # shuffles data by default before splitting
 
-    # train classifiers with different methods
+    # train classifier with 70/30 split
     print("trad classif")
     trad_classif.append(traditional_classification(X_train, X_test, y_train, y_test))
     print("Score:", trad_classif[-1])
+
+    # train classifier with cross validation
     print("cv classif")
     cv.append(cv_classification(X, y, 5))
     print("Score:", cv[-1], "\n")
@@ -188,7 +184,7 @@ def compare_embeddings(df):
   return (round(np.mean(np.asarray(fast_emb)),3), round(np.mean(np.asarray(w2v_emb)),3), round(np.mean(np.asarray(glov_emb)),3), round(np.mean(np.asarray(tf_idf_emb)), 3))
 
 
-# computes the mean socre over all lemma
+# prints the mean score over all lemma for better understanding
 def get_best(scores, names):
   """prints the scores for better understanding"""
   
@@ -197,9 +193,10 @@ def get_best(scores, names):
     print(f"{names[i]}: {scores[i]}")
 
 
-# gives mean score over all lemma for decreasing number of examples (always around 10 test examples)
+# gives mean score over all lemma for decreasing number of examples
 def decrease_training_examples(df):
   """trains the classifier with decreasing training examples. Returns array with scores."""
+
   scores = []
   should_be_nb = 50
   t_size=0.0
@@ -263,11 +260,13 @@ def save_trained_classif(df):
     # compute data frame with only one lemma
     data = df[(df['lemma'] == lemma)].reset_index()
 
+    # get X and y and train classifier with all examples
     X, y = get_x_y(data, "ft")
     classifier = MLPClassifier(max_iter=500, hidden_layer_sizes=(300,))
     print("Train classifier")
     classifier.fit(X, y)
 
+    # save trained classifier to a joblib file
     print("Save model\n")
     file_name = f"../trained_models/{lemma}.joblib"
     dump(classifier, file_name)

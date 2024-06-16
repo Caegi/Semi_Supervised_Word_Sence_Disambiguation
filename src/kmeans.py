@@ -60,8 +60,8 @@ class Kmeans:
 
   def fit(self):
     self.df.loc[:, 'cluster'] = 0
+
     # Excluding last column which is cluster label
-    # self.df'embedding'] = self.df['sentence'].apply(lambda x: nlp(x).vector) # type: ignore
     embeddings_array = np.asarray(self.df[self.emb_src].to_list())
     self.centroids = self._init_centroids()
     is_changed = True
@@ -106,9 +106,6 @@ class Kmeans:
     # compute f-score
     score = f1_score(y, y_pred, average="micro")
 
-    # Purity au cas où on veut l'utiliser...
-    # score = np.sum(np.max(M1, axis=0)) / np.sum(M1) # type: ignore
-
     return score
 
 
@@ -151,7 +148,7 @@ class KmeansConstraint(Kmeans):
         return centroids
 
 def wsi_compare_embeddings(df, nb_ex4constraint):
-    # List of verbs in the Dataset: 66 verbs
+  # List of verbs in the Dataset: 66 verbs
   list_of_verbs = df['lemma'].unique()
 
   scores_kmeans_ft = []
@@ -227,11 +224,12 @@ def save_trained_kmeans(df):
     # number of clusters
     k = len(data['word_sense'].unique())
 
-    # instantiate KMeans Clustering
+    # train KMeans Clustering
     print("Fit K-Means")
     my_kmeans = KmeansConstraint(data, k, "ft_embeddings", 9)
     my_kmeans.fit()
 
+    # save clusters to joblib file
     print("Save model\n")
     file_name = f"../trained_kmeans/{lemma}.joblib"
     dump(my_kmeans, file_name)

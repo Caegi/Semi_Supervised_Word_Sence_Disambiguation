@@ -10,7 +10,7 @@ df = pd.read_json("src/fse_data_w_embeddings.json")
 # count number of examples per lemma
 
 counts = pd.DataFrame(df["lemma"].value_counts())
-# print(counts)
+
 ax = sns.countplot(counts, x="lemma")
 ax.set(xlabel='Number of examples', ylabel='Count')
 ax.bar_label(ax.containers[0])
@@ -33,9 +33,10 @@ sns.set_theme(style='dark',rc={'axes.facecolor':'white', 'figure.facecolor':'whi
 
 fig, ax = plt.subplots(figsize=(12,6))
 
+# line plot for k-means
 l = sns.lineplot(data = df['kmeans'], marker='o', sort = False, ax=ax, label='K-Means', color='#00CED1')
 
-
+# bar plot for the classification
 c = sns.barplot(data = df, x='examples', y='classif', alpha=0.5, ax=ax, color="black", label="Classification")
 
 c.set_xlabel("Number of Examples")
@@ -65,9 +66,10 @@ sns.set_theme(style='dark',rc={'axes.facecolor':'white', 'figure.facecolor':'whi
 
 fig, ax = plt.subplots(figsize=(12,6))
 
+# line plot for the classification
 l = sns.lineplot(data = df['classif'], marker='o', sort = False, ax=ax,  label='Classification', color='#00CED1')
 
-
+# bar plot for k-means
 c = sns.barplot(data = df, x='examples', y='kmeans', alpha=0.5, ax=ax, color="black", label="K-Means")
 
 c.set_xlabel("Number of Examples")

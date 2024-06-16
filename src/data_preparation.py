@@ -50,12 +50,6 @@ def get_sense_id(row):
     return sense_to_id[row['lemma']][row['word_sense']]
 
 
-# # def tokenize(row):
-# #     '''returns tokenized sentence'''
-    
-# #     return nlp(row.sentence.lower()).text
-
-
 def get_data():
   '''returns the prepared data for the tasks'''
   
@@ -74,8 +68,8 @@ def get_data():
   ft_embed_column = [ft.get_sentence_vector(row['sentence']) for _, row in df.iterrows()]
   df['ft_embeddings'] = ft_embed_column
 
-  # glove_embed_column = [glove.get_mean_vector(row['sentence']) for _, row in df.iterrows()]
-  # df['glove_embeddings'] = glove_embed_column
+  glove_embed_column = [glove.get_mean_vector(row['sentence']) for _, row in df.iterrows()]
+  df['glove_embeddings'] = glove_embed_column
 
   return df
 

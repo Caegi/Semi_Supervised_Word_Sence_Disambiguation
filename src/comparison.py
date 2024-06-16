@@ -53,6 +53,7 @@ def compare(df, n):
   print(f"mean score tf_idf classif: {np.mean(np.asarray(scores_classif_tfidf))}")
 
 def print_comparison_kmeans_clf(df, max_ex4constraint=10):
+
   # List of verbs in the Dataset: 66 verbs
   list_of_verbs = df['lemma'].unique()
 
@@ -69,6 +70,7 @@ def print_comparison_kmeans_clf(df, max_ex4constraint=10):
     k = len(verb_df['word_sense'].unique())
 
     for nb_ex4constraint in range(max_ex4constraint):
+      
       # instantiate KMeans Clustering with constraints
       my_kmeans_constraint = KmeansConstraint(verb_df, k, "ft_embeddings", nb_ex4constraint)
       my_kmeans_constraint.fit()

@@ -6,6 +6,7 @@ def online_help():
     
     parser = argparse.ArgumentParser(description=help_description)
 
+    # add the different parsing options
     parser.add_argument("-d", "--wsd", required=False, action = "store_true", help="Execute only WSD tests")
     parser.add_argument("-i", "--wsi", required=False, action = "store_true", help="Execute only WSI tests")
     parser.add_argument("-c", "--compare", required=False, action = "store_true", help="Execute the comparison")

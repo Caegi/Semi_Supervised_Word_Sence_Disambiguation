@@ -46,7 +46,7 @@ elif a.online_help().wsi:
 
 # show k-means, constraint k-means, classification and classification with TF-IDF
 elif a.online_help().compare:
-    print("WARNING: This will take around 1h to run.")
+    print("WARNING: This will take around 15 min to run.")
     exs_2add_as_constraint = 2
     compare(df, exs_2add_as_constraint)
 
@@ -57,6 +57,7 @@ elif a.online_help().increase:
     print_comparison_kmeans_clf(df, max_ex4constraint)
 
 elif a.online_help().decrease:
+    print("WARNING: This will take around 1h to run!")
     decrease_training_examples(df)
 
 # get word sense for a new sentence 

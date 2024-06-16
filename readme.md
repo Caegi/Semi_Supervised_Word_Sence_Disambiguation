@@ -1,6 +1,8 @@
 # Semi Supervised Word Sense Disambiguation
 
-What is the project about?
+This project implements Word Sense Disambiguation and Word Sense Induction. It compares both ways of disambiguating words within a context.
+
+Link to our project on <a href="https://github.com/Caegi/Semi_Supervised_Word_Sence_Disambiguation">GitHub</a> 
 
 ## How to use
 Every functionality can be used with a command in the terminal. Before you start, make sure to add two files to the parent directory of our project: 

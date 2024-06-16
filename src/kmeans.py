@@ -29,28 +29,33 @@ class Kmeans:
     return centroids_array
 
   # Method to calculate new centroids
-  def _get_new_centroids(self, cs):
+  def _get_new_centroids(self, unique_clusters):
     new_centroids = []
-    for c in cs:
-      vectors = np.vstack(self.df.loc[self.df['cluster'] == c, self.emb_src].values) # type: ignore
+
+    for cluster in unique_clusters:
+      vectors = np.vstack(self.df.loc[self.df['cluster'] == cluster, self.emb_src].values) # type: ignore
       centroid = np.mean(vectors, axis=0)
       new_centroids.append(centroid)
+
     return np.array(new_centroids)
 
   # Method to calculate cosine similarity between centroids and all examples
-  def _get_new_clusters(self, iris_array, centroids):
+  def _get_new_clusters(self, emb_arrays, centroids):  # shape emb_arrays(nb_examples,embedding_size,1), shape centroids(k, embedding_size,1)
     clusters = []
-    for vector in iris_array:
+    for emb_array in emb_arrays: # shape emb_array: (embedding_size, 1)
       similarities = []
+
       for i in range(len(centroids)):
-        dot_product = np.dot(vector, centroids[i])
-        m_vector = np.linalg.norm(vector)
-        m_centroid = np.linalg.norm(centroids[i])
-        similarity = dot_product / (m_vector * m_centroid)
+        dot_product = np.dot(emb_array, centroids[i]) # shape centroids[i]: (embedding_size,1)
+        norm_emb_array = np.linalg.norm(emb_array)
+        norm_centroid = np.linalg.norm(centroids[i])
+        similarity = dot_product / (norm_emb_array * norm_centroid)
         similarities.append(similarity)
+
       max_value = max(similarities)
       max_index = similarities.index(max_value)
       clusters.append(max_index)
+
     return clusters
 
   def fit(self):
@@ -68,8 +73,8 @@ class Kmeans:
       self.df.loc[:, 'cluster'] = new_clusters
 
       if not np.array_equal(np.array(new_clusters), clusters_before):
-        class_unique = self.df['cluster'].unique()
-        self.centroids = self._get_new_centroids(class_unique)
+        unique_clusters = self.df['cluster'].unique()
+        self.centroids = self._get_new_centroids(unique_clusters)
       else:
         is_changed = False
 
